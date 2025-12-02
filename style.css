@@ -1,3 +1,7 @@
+.title{
+  font-family: "Courier New", monospace;
+}
+
 body {
   font-family: "Segoe UI", Tahoma, sans-serif;
   background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
@@ -27,6 +31,12 @@ header {
 h2 {
   color: #00eaff;
   text-shadow: 0 0 5px rgba(0,234,255,0.6);
+}
+a{
+  color: #00eaff;
+  text-shadow: #00ff9d;
+  font-weight: bold;
+  text-transform: capitalize;
 }
 ul {
   line-height: 1.8;
