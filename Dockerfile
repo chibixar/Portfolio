@@ -1,7 +1,8 @@
 FROM node:20-alpine AS builder
 WORKDIR /app
-COPY package*.json ./
-RUN npm install
+#locally run npm install to create packages previously!
+COPY package*.json ./               
+RUN npm ci
 COPY . .
 RUN npm run build
 

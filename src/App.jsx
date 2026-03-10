@@ -25,7 +25,7 @@ const CONFIG = {
   contact: {
     email: null,                        // e.g. "you@example.com"
     github: "github.com/arkadz-m",      // just the path, no https://
-    linkedin: null,                     // e.g. "linkedin.com/in/yourname"
+    linkedin: "www.linkedin.com/in/arkadz-minkevich-devops/",                     // e.g. "linkedin.com/in/yourname"
     telegram: null,                     // e.g. "t.me/yourhandle"
   },
 
