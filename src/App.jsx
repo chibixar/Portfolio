@@ -45,7 +45,7 @@ const CONFIG = {
       items: [
         { name: "GitHub Actions", level: 88 },
         { name: "Nginx",          level: 82 },
-        { name: "Cloudflare DNS", level: 80 },
+        { name: "Cloudflare DNS", level: 98 },
         { name: "Git",            level: 90 },
       ],
     },

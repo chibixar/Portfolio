@@ -12,12 +12,13 @@ A personal portfolio website with a hacker/terminal aesthetic — and more impor
 
 | Layer | Tool |
 |---|---|
-| DNS / CDN | Cloudflare |
 | Web Server / Proxy | Nginx |
+| SSL auto renewal | Certbot |
 | CI / CD | GitHub Actions |
 | Infrastructure as Code | Terraform |
 | Configuration Management | Ansible |
 | Containers | Docker |
+| DNS / CDN | Cloudflare |
 | OS / Shell | Linux · Bash |
 
 ---
