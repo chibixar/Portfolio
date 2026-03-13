@@ -1,0 +1,4 @@
+output "server_ip" {
+  description = "Public IP of the server — point your DNS A record here"
+  value       = digitalocean_server.portfolio.ipv4_address
+}

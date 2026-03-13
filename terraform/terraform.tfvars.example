@@ -1,0 +1,5 @@
+# Copy this file to terraform.tfvars and fill in your values
+# terraform.tfvars is gitignored — never commit it
+
+digitalocean_token  = "digitalocean_api_token_here"
+ssh_public_key = "ssh-ed25519 AAAA... you@machine"

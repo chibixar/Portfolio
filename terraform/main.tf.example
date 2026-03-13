@@ -1,0 +1,58 @@
+terraform {
+  required_providers {
+    digitalocean = {
+      source  = "digitalocean/digitalocean"
+      version = "~> 1.50"
+    }
+  }
+}
+
+provider "digitalocean" {
+  token = var.digitalocean
+}
+
+# SSH key — upload your public key to Hetzner
+resource "digitalocean_ssh_key" "default" {
+  name       = "portfolio-key"
+  public_key = var.ssh_public_key
+}
+
+# The server
+resource "digitalocean" "portfolio" {
+  name        = "portfolio"
+  image       = "ubuntu-24.04"
+  server_type = "cx22"           # 2 vCPU, 4GB RAM, ~4€/mo — cheapest that's comfortable
+  location    = "hel1"           # Helsinki — closest to Minsk
+  ssh_keys    = [digitalocean_ssh_key.default.id]
+}
+
+# Firewall — only allow SSH, HTTP, HTTPS
+resource "digitalocean_firewall" "portfolio" {
+  name = "portfolio-firewall"
+
+  rule {
+    direction = "in"
+    protocol  = "tcp"
+    port      = "22"
+    source_ips = ["0.0.0.0/0", "::/0"]
+  }
+
+  rule {
+    direction = "in"
+    protocol  = "tcp"
+    port      = "80"
+    source_ips = ["0.0.0.0/0", "::/0"]
+  }
+
+  rule {
+    direction = "in"
+    protocol  = "tcp"
+    port      = "443"
+    source_ips = ["0.0.0.0/0", "::/0"]
+  }
+}
+
+resource "digitalocean_firewall_attachment" "portfolio" {
+  firewall_id = digitalocean_firewall.portfolio.id
+  server_ids  = [digitalocean_server.portfolio.id]
+}
