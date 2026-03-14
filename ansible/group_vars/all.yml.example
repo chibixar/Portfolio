@@ -1,0 +1,4 @@
+server_ip: "YOUR_SERVER_IP"
+domain: "domain"
+email: "your@email.com"
+ghcr_image: "ghcr.io/arkadz-m/portfolio:latest"

@@ -1,6 +1,6 @@
 server {
     listen 80;
-    server_name YOUR_DOMAIN;
+    server_name {{ domain }};
 
     # certbot places challenge files here to prove domain ownership
     location /.well-known/acme-challenge/ {
@@ -15,11 +15,11 @@ server {
 
 server {
     listen 443 ssl;
-    server_name YOUR_DOMAIN;
+    server_name {{ domain }};
 
     # certificates written by certbot into the shared volume
-    ssl_certificate     /etc/letsencrypt/live/YOUR_DOMAIN/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/YOUR_DOMAIN/privkey.pem;
+    ssl_certificate     /etc/letsencrypt/live/{{ domain }}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/{{ domain }}/privkey.pem;
 
     # modern TLS only
     ssl_protocols TLSv1.2 TLSv1.3;

@@ -1,0 +1,6 @@
+---
+- name: Setup portfolio server
+  hosts: portfolio
+  become: true
+  roles:
+    - portfolio

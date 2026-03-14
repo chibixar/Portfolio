@@ -1,0 +1,100 @@
+---
+# ── System
+- name: Update apt cache
+  apt:
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Install required packages
+  apt:
+    name:
+      - ca-certificates
+      - curl
+      - git
+    state: present
+
+# ── Docker
+- name: Add Docker GPG key
+  apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+
+- name: Add Docker repository
+  apt_repository:
+    repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+    state: present
+
+- name: Install Docker
+  apt:
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-compose-plugin
+    state: present
+
+- name: Start and enable Docker
+  systemd:
+    name: docker
+    state: started
+    enabled: true
+
+# ── App
+- name: Create app directory
+  file:
+    path: /opt/portfolio
+    state: directory
+    mode: "0755"
+
+- name: Copy docker-compose.yml
+  copy:
+    src: docker-compose.yml.j2
+    dest: /opt/portfolio/docker-compose.yml
+
+- name: Create nginx config directory
+  file:
+    path: /opt/portfolio/nginx/conf
+    state: directory
+    mode: "0755"
+
+- name: Copy nginx config with domain substituted
+  template:
+    src: default.conf.j2
+    dest: /opt/portfolio/nginx/conf/default.conf
+
+- name: Create certbot directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0755"
+  loop:
+    - /opt/portfolio/certbot/www
+    - /opt/portfolio/certbot/conf
+
+# ── Pull and start
+- name: Pull latest image from GHCR
+  community.docker.docker_image:
+    name: "{{ ghcr_image }}"
+    source: pull
+
+- name: Start containers
+  community.docker.docker_compose_v2:
+    project_src: /opt/portfolio
+    state: present
+
+# ── SSL
+- name: Issue SSL certificate
+  command: >
+    docker compose run --rm certbot certbot certonly
+    --webroot
+    --webroot-path=/var/www/certbot
+    --email {{ email }}
+    --agree-tos
+    --no-eff-email
+    --non-interactive
+    -d {{ domain }}
+  args:
+    chdir: /opt/portfolio
+  register: certbot_result
+  changed_when: "'Successfully received certificate' in certbot_result.stdout"
+  failed_when: certbot_result.rc != 0 and 'Certificate not yet due for renewal' not in certbot_result.stdout
