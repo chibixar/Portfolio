@@ -11,7 +11,7 @@ provider "digitalocean" {
   token = var.digitalocean
 }
 
-# SSH key — upload your public key to Hetzner
+# SSH key — upload your public key to server
 resource "digitalocean_ssh_key" "default" {
   name       = "portfolio-key"
   public_key = var.ssh_public_key
