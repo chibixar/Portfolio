@@ -1,0 +1,34 @@
+name: Deploy Portfolio
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        run: echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u "${{ secrets.GHCR_USERNAME }}" --password-stdin
+
+      - name: Build Docker image
+        run: docker build -t ghcr.io/${{ secrets.GHCR_USERNAME }}/portfolio-react:latest .
+
+      - name: Push Docker image
+        run: docker push ghcr.io/${{ secrets.GHCR_USERNAME }}/portfolio-react:latest
+
+      - name: Deploy to server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: root
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /opt/portfolio
+            docker compose pull
+            docker compose up -d --no-build
