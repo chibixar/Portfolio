@@ -5,12 +5,11 @@ import { useState, useEffect, useRef, useCallback } from "react";
 // ║         Edit this object — nothing else needs to change         ║
 // ╚══════════════════════════════════════════════════════════════════╝
 const CONFIG = {
-  // Personal
   firstName: "Arkadz",
   lastName: "Minkevich",
-  handle: "arkadz",           // shell prompt:  handle@hostname:~$
-  hostname: "minsk",          // shell hostname
-  domain: "chibixar.com",       // shown in nav bar
+  handle: "arkadz",
+  hostname: "minsk",
+  domain: "chibixar.com",
   role: "DevOps / Platform Engineer",
   location: "Minsk, Belarus",
   locationCoords: "53.9045° N, 27.5615° E",
@@ -20,16 +19,12 @@ const CONFIG = {
     "Engineer at the intersection of infrastructure, automation, and reliability.",
     "I turn manual toil into deterministic pipelines — if it's not in code, it doesn't exist.",
   ],
-
-  // Contact — set any value to null to hide that command entirely
   contact: {
-    email: null,                        // e.g. "you@example.com"
-    github: "github.com/arkadz-m",      // just the path, no https://
-    linkedin: "www.linkedin.com/in/arkadz-minkevich-devops/",                     // e.g. "linkedin.com/in/yourname"
-    telegram: null,                     // e.g. "t.me/yourhandle"
+    email: null,
+    github: "github.com/chibixar",
+    linkedin: null,
+    telegram: null,
   },
-
-  // Skills — each group becomes its own terminal window
   skills: [
     {
       group: "infrastructure/",
@@ -50,8 +45,6 @@ const CONFIG = {
       ],
     },
   ],
-
-  // Projects
   projects: [
     {
       name: "do-vpn-infra",
@@ -90,8 +83,6 @@ const CONFIG = {
       status: "abandoned",
     },
   ],
-
-  // Infrastructure stack — ordered top-to-bottom
   infraStack: [
     { layer: "DNS / CDN",              tools: ["Cloudflare"],       icon: "🌐" },
     { layer: "Web Server / Proxy",     tools: ["Nginx"],            icon: "🔀" },
@@ -180,13 +171,13 @@ function Terminal({ title = "terminal", children, style = {} }) {
       boxShadow: "0 0 30px rgba(0,255,65,0.15), inset 0 0 30px rgba(0,0,0,0.5)",
       ...style,
     }}>
-      <div style={{ background: "#001400", borderBottom: "1px solid #00ff41", padding: "6px 12px", display: "flex", alignItems: "center", gap: 8 }}>
-        <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#ff5f57", display: "inline-block" }} />
-        <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#febc2e", display: "inline-block" }} />
-        <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#28c840", display: "inline-block" }} />
-        <span style={{ color: "#00aa2a", fontSize: 11, marginLeft: 8, letterSpacing: 2 }}>{title}</span>
+      <div style={{ background: "#001400", borderBottom: "1px solid #00ff41", padding: "6px 12px", display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}>
+        <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#ff5f57", flexShrink: 0, display: "inline-block" }} />
+        <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#febc2e", flexShrink: 0, display: "inline-block" }} />
+        <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#28c840", flexShrink: 0, display: "inline-block" }} />
+        <span style={{ color: "#00aa2a", fontSize: 11, marginLeft: 8, letterSpacing: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{title}</span>
       </div>
-      <div style={{ padding: "16px 20px" }}>{children}</div>
+      <div style={{ padding: "16px 20px", overflowX: "auto" }}>{children}</div>
     </div>
   );
 }
@@ -197,12 +188,12 @@ function Prompt({ cmd, output, delay = 0 }) {
   const { displayed, done } = useTypewriter(cmd, 35, delay);
   useEffect(() => { if (done) { const t = setTimeout(() => setShowOutput(true), 200); return () => clearTimeout(t); } }, [done]);
   return (
-    <div style={{ marginBottom: 12 }}>
-      <div style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
-        <span style={{ color: "#00ff41", flexShrink: 0 }}>{PROMPT}</span>
-        <span style={{ color: "#e0ffe0" }}>{displayed}{!done && <span style={{ animation: "blink 1s infinite" }}>▋</span>}</span>
+    <div style={{ marginBottom: 12, minWidth: 0 }}>
+      <div style={{ display: "flex", alignItems: "flex-start", gap: 8, flexWrap: "wrap" }}>
+        <span style={{ color: "#00ff41", flexShrink: 0, fontSize: "clamp(10px,2.5vw,13px)" }}>{PROMPT}</span>
+        <span style={{ color: "#e0ffe0", wordBreak: "break-all", fontSize: "clamp(10px,2.5vw,13px)" }}>{displayed}{!done && <span style={{ animation: "blink 1s infinite" }}>▋</span>}</span>
       </div>
-      {showOutput && <div style={{ color: "#88cc88", marginTop: 4, lineHeight: 1.7 }}>{output}</div>}
+      {showOutput && <div style={{ color: "#88cc88", marginTop: 4, lineHeight: 1.7, fontSize: "clamp(10px,2.5vw,12px)" }}>{output}</div>}
     </div>
   );
 }
@@ -211,12 +202,12 @@ function Prompt({ cmd, output, delay = 0 }) {
 function SkillBadge({ name, level }) {
   const bars = Math.round(level / 10);
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
-      <span style={{ color: "#00ff41", width: 160, fontSize: 12, letterSpacing: 1 }}>{name}</span>
-      <div style={{ display: "flex", gap: 2 }}>
+    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8, flexWrap: "wrap" }}>
+      <span style={{ color: "#00ff41", width: "clamp(100px,40%,160px)", fontSize: 12, letterSpacing: 1, flexShrink: 0 }}>{name}</span>
+      <div style={{ display: "flex", gap: 2, flexShrink: 0 }}>
         {Array(10).fill(0).map((_, i) => (
           <div key={i} style={{
-            width: 8, height: 14,
+            width: 7, height: 13,
             background: i < bars ? "#00ff41" : "#001a00",
             border: `1px solid ${i < bars ? "#00ff41" : "#003300"}`,
             boxShadow: i < bars ? "0 0 4px #00ff41" : "none",
@@ -232,6 +223,7 @@ function SkillBadge({ name, level }) {
 // ─── Project Card ──────────────────────────────────────────────────────────────
 function ProjectCard({ name, desc, tags, status }) {
   const [hovered, setHovered] = useState(false);
+  const statusColor = status === "active" ? "#00ff41" : status === "finished" ? "#4488ff" : status === "abandoned" ? "#883300" : "#555";
   return (
     <div
       onMouseEnter={() => setHovered(true)}
@@ -246,13 +238,13 @@ function ProjectCard({ name, desc, tags, status }) {
       }}
     >
       {hovered && <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 1, background: "linear-gradient(90deg,transparent,#00ff41,transparent)", animation: "scanline 1.5s linear infinite" }} />}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
-        <span style={{ color: "#00ff41", fontWeight: 700, fontSize: 14, letterSpacing: 1 }}>{name}</span>
-        <span style={{ fontSize: 10, padding: "2px 8px", border: `1px solid ${status === "active" ? "#00ff41" : status === "finished" ? "#4488ff" : status === "abandoned" ? "#883300" : "#555"}`, color: status === "active" ? "#00ff41" : status === "finished" ? "#4488ff" : status === "abandoned" ? "#883300" : "#555", borderRadius: 2, letterSpacing: 2 }}>{status.toUpperCase()}</span>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8, gap: 8 }}>
+        <span style={{ color: "#00ff41", fontWeight: 700, fontSize: "clamp(12px,3vw,14px)", letterSpacing: 1, wordBreak: "break-word" }}>{name}</span>
+        <span style={{ fontSize: 9, padding: "2px 6px", border: `1px solid ${statusColor}`, color: statusColor, borderRadius: 2, letterSpacing: 1, flexShrink: 0, whiteSpace: "nowrap" }}>{status.toUpperCase()}</span>
       </div>
-      <p style={{ color: "#88aa88", fontSize: 12, lineHeight: 1.6, margin: "0 0 12px" }}>{desc}</p>
+      <p style={{ color: "#88aa88", fontSize: "clamp(11px,2.5vw,12px)", lineHeight: 1.6, margin: "0 0 12px" }}>{desc}</p>
       <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-        {tags.map(t => <span key={t} style={{ fontSize: 10, color: "#004400", background: "#001400", border: "1px solid #003300", padding: "2px 6px", borderRadius: 2, letterSpacing: 1 }}>{t}</span>)}
+        {tags.map(t => <span key={t} style={{ fontSize: 9, color: "#004400", background: "#001400", border: "1px solid #003300", padding: "2px 5px", borderRadius: 2, letterSpacing: 1 }}>{t}</span>)}
       </div>
     </div>
   );
@@ -262,7 +254,7 @@ function ProjectCard({ name, desc, tags, status }) {
 function SectionHeader({ cmd }) {
   const { displayed } = useTypewriter(cmd, 30, 100);
   return (
-    <div style={{ marginBottom: 28, fontFamily: "monospace", fontSize: 13 }}>
+    <div style={{ marginBottom: 28, fontFamily: "monospace", fontSize: "clamp(10px,2.5vw,13px)", overflowX: "auto", whiteSpace: "nowrap" }}>
       <span style={{ color: "#00ff41" }}>{PROMPT}</span>{" "}
       <span style={{ color: "#88cc88" }}>{displayed}</span>
       <span style={{ animation: "blink 1s infinite", color: "#00ff41" }}>▋</span>
@@ -273,31 +265,62 @@ function SectionHeader({ cmd }) {
 // ─── Nav ───────────────────────────────────────────────────────────────────────
 function Nav({ active, onNav }) {
   const links = ["whoami", "skills", "projects", "infra", "contact"];
+  const [menuOpen, setMenuOpen] = useState(false);
   return (
     <nav style={{
       position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
       background: "rgba(0,4,0,0.95)", borderBottom: "1px solid #001a00",
-      backdropFilter: "blur(10px)", padding: "12px 40px",
-      display: "flex", alignItems: "center", justifyContent: "space-between",
+      backdropFilter: "blur(10px)",
     }}>
-      <div style={{ color: "#00ff41", fontFamily: "monospace", fontSize: 13, letterSpacing: 3 }}>
-        <span style={{ color: "#005500" }}>root@</span>
-        <GlitchText text={CONFIG.domain} />
+      <div style={{ padding: "12px 16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <div style={{ color: "#00ff41", fontFamily: "monospace", fontSize: "clamp(11px,3vw,13px)", letterSpacing: 2 }}>
+          <span style={{ color: "#005500" }}>root@</span>
+          <GlitchText text={CONFIG.domain} />
+        </div>
+
+        {/* Desktop nav */}
+        <div className="desktop-nav" style={{ display: "flex", gap: 4 }}>
+          {links.map(l => (
+            <button key={l} onClick={() => onNav(l)} style={{
+              background: active === l ? "rgba(0,255,65,0.1)" : "transparent",
+              border: active === l ? "1px solid #00ff41" : "1px solid transparent",
+              color: active === l ? "#00ff41" : "#336633",
+              fontFamily: "monospace", fontSize: 11, letterSpacing: 2,
+              padding: "5px 10px", cursor: "pointer", borderRadius: 2,
+              transition: "all 0.2s ease",
+            }}>
+              {active === l && "["}{l}{active === l && "]"}
+            </button>
+          ))}
+        </div>
+
+        {/* Mobile hamburger */}
+        <button
+          className="mobile-menu-btn"
+          onClick={() => setMenuOpen(o => !o)}
+          style={{ background: "transparent", border: "1px solid #003300", color: "#00ff41", fontFamily: "monospace", fontSize: 16, padding: "4px 10px", cursor: "pointer", borderRadius: 2 }}
+        >
+          {menuOpen ? "✕" : "☰"}
+        </button>
       </div>
-      <div style={{ display: "flex", gap: 4 }}>
-        {links.map(l => (
-          <button key={l} onClick={() => onNav(l)} style={{
-            background: active === l ? "rgba(0,255,65,0.1)" : "transparent",
-            border: active === l ? "1px solid #00ff41" : "1px solid transparent",
-            color: active === l ? "#00ff41" : "#336633",
-            fontFamily: "monospace", fontSize: 11, letterSpacing: 2,
-            padding: "5px 14px", cursor: "pointer", borderRadius: 2,
-            transition: "all 0.2s ease",
-          }}>
-            {active === l && "["}{l}{active === l && "]"}
-          </button>
-        ))}
-      </div>
+
+      {/* Mobile dropdown */}
+      {menuOpen && (
+        <div className="mobile-nav" style={{ borderTop: "1px solid #001a00", padding: "8px 16px 12px" }}>
+          {links.map(l => (
+            <button key={l} onClick={() => { onNav(l); setMenuOpen(false); }} style={{
+              display: "block", width: "100%", textAlign: "left",
+              background: active === l ? "rgba(0,255,65,0.08)" : "transparent",
+              border: "none", borderLeft: active === l ? "2px solid #00ff41" : "2px solid transparent",
+              color: active === l ? "#00ff41" : "#336633",
+              fontFamily: "monospace", fontSize: 13, letterSpacing: 2,
+              padding: "8px 12px", cursor: "pointer", marginBottom: 2,
+            }}>
+              {active === l && "> "}{l}
+            </button>
+          ))}
+        </div>
+      )}
     </nav>
   );
 }
@@ -308,25 +331,24 @@ function WhoAmI() {
     <div style={{ maxWidth: 900, margin: "0 auto" }}>
       <div style={{ marginBottom: 40, textAlign: "center" }}>
         <div style={{ fontFamily: "monospace", color: "#003300", fontSize: 11, marginBottom: 16, letterSpacing: 4 }}>INITIALIZING PROFILE...</div>
-        <h1 style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "clamp(36px,6vw,72px)", fontWeight: 900, color: "#00ff41", letterSpacing: -2, lineHeight: 1, textShadow: "0 0 40px rgba(0,255,65,0.5)", margin: "0 0 4px" }}>
+        <h1 style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "clamp(32px,10vw,72px)", fontWeight: 900, color: "#00ff41", letterSpacing: -2, lineHeight: 1, textShadow: "0 0 40px rgba(0,255,65,0.5)", margin: "0 0 4px" }}>
           <GlitchText text={CONFIG.firstName.toUpperCase()} />
         </h1>
-        <h1 style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "clamp(36px,6vw,72px)", fontWeight: 900, color: "#003300", letterSpacing: -2, lineHeight: 1, margin: "0 0 24px" }}>
+        <h1 style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "clamp(32px,10vw,72px)", fontWeight: 900, color: "#003300", letterSpacing: -2, lineHeight: 1, margin: "0 0 24px" }}>
           {CONFIG.lastName.toUpperCase()}
         </h1>
-        <div style={{ display: "flex", justifyContent: "center", gap: 20, flexWrap: "wrap", marginBottom: 32 }}>
+        <div style={{ display: "flex", justifyContent: "center", gap: 12, flexWrap: "wrap", marginBottom: 32, padding: "0 8px" }}>
           {[CONFIG.role, CONFIG.location].map(tag => (
-            <span key={tag} style={{ fontFamily: "monospace", fontSize: 12, color: "#005500", letterSpacing: 3 }}>// {tag}</span>
+            <span key={tag} style={{ fontFamily: "monospace", fontSize: "clamp(10px,2.5vw,12px)", color: "#005500", letterSpacing: 2 }}>// {tag}</span>
           ))}
         </div>
         <div style={{ display: "inline-block", background: "#000", border: "1px solid #002200", borderRadius: 3, padding: "3px 14px" }}>
           <span style={{ fontFamily: "monospace", fontSize: 11, color: "#00aa41", letterSpacing: 2 }}>● SYSTEM ONLINE</span>
         </div>
       </div>
-
-      <Terminal title={`${CONFIG.handle}@${CONFIG.hostname} — bash — 80×24`}>
+      <Terminal title={`${CONFIG.handle}@${CONFIG.hostname} — bash`}>
         <Prompt cmd="cat /etc/profile.d/me.conf" delay={400} output={
-          <div>
+          <div style={{ fontSize: "clamp(10px,2.5vw,12px)" }}>
             <div><span style={{ color: "#005500" }}>NAME</span>=<span style={{ color: "#00cc41" }}>"{CONFIG.firstName} {CONFIG.lastName}"</span></div>
             <div><span style={{ color: "#005500" }}>LOCATION</span>=<span style={{ color: "#00cc41" }}>"{CONFIG.location}"</span></div>
             <div><span style={{ color: "#005500" }}>ROLE</span>=<span style={{ color: "#00cc41" }}>"{CONFIG.role}"</span></div>
@@ -334,7 +356,7 @@ function WhoAmI() {
           </div>
         } />
         <Prompt cmd="cat ~/bio.txt" delay={2000} output={
-          <div>{CONFIG.bio.map((line, i) => <div key={i}>{line}</div>)}</div>
+          <div style={{ fontSize: "clamp(10px,2.5vw,12px)" }}>{CONFIG.bio.map((line, i) => <div key={i}>{line}</div>)}</div>
         } />
         <Prompt cmd="echo $READY_TO_BUILD" delay={4200} output={
           <span style={{ color: "#00ff41", fontWeight: "bold" }}>true</span>
@@ -349,7 +371,7 @@ function Skills() {
   return (
     <div style={{ maxWidth: 900, margin: "0 auto" }}>
       <SectionHeader cmd="ls -la ~/skills/" />
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(380px, 1fr))", gap: 20 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%,340px), 1fr))", gap: 20 }}>
         {CONFIG.skills.map(group => (
           <Terminal key={group.group} title={group.group}>
             {group.items.map(s => <SkillBadge key={s.name} {...s} />)}
@@ -365,7 +387,7 @@ function Projects() {
   return (
     <div style={{ maxWidth: 900, margin: "0 auto" }}>
       <SectionHeader cmd="find ~/projects -maxdepth 1 -type d | sort" />
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(380px, 1fr))", gap: 16 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%,340px), 1fr))", gap: 16 }}>
         {CONFIG.projects.map(p => <ProjectCard key={p.name} {...p} />)}
       </div>
     </div>
@@ -378,13 +400,12 @@ function Infra() {
     <div style={{ maxWidth: 900, margin: "0 auto" }}>
       <SectionHeader cmd="cat ~/infra/stack.yml" />
       <Terminal title="stack overview — top to bottom">
-        <div style={{ fontFamily: "monospace", fontSize: 12 }}>
+        <div style={{ fontFamily: "monospace", fontSize: "clamp(11px,2.5vw,12px)" }}>
           {CONFIG.infraStack.map(s => (
-            <div key={s.layer} style={{ display: "flex", alignItems: "center", gap: 12, padding: "8px 0", borderBottom: "1px solid #001400" }}>
-              <span style={{ color: "#005500", width: 20, textAlign: "center" }}>{s.icon}</span>
-              <span style={{ color: "#336633", width: 230, flexShrink: 0 }}>{s.layer}</span>
-              <span style={{ color: "#003300" }}>──</span>
-              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            <div key={s.layer} style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "8px 0", borderBottom: "1px solid #001400", flexWrap: "wrap" }}>
+              <span style={{ color: "#005500", width: 20, flexShrink: 0, textAlign: "center" }}>{s.icon}</span>
+              <span style={{ color: "#336633", minWidth: 160, flexShrink: 0 }}>{s.layer}</span>
+              <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                 {s.tools.map(t => (
                   <span key={t} style={{ color: "#00ff41", background: "rgba(0,255,65,0.05)", border: "1px solid #002200", padding: "1px 8px", borderRadius: 2 }}>{t}</span>
                 ))}
@@ -392,7 +413,7 @@ function Infra() {
             </div>
           ))}
         </div>
-        <div style={{ marginTop: 16, color: "#003300", fontSize: 11, lineHeight: 1.8 }}>
+        <div style={{ marginTop: 16, color: "#003300", fontSize: "clamp(10px,2.5vw,11px)", lineHeight: 1.8 }}>
           <div># This portfolio runs on the exact same stack.</div>
           <div># Terraform provisions → Ansible configures → GitHub Actions deploys.</div>
           <div># Nginx terminates TLS; Docker runs the app; Cloudflare handles DNS.</div>
@@ -407,8 +428,8 @@ function Infra() {
 function Contact() {
   const [input, setInput] = useState("");
   const logRef = useRef(null);
+  const inputRef = useRef(null);
 
-  // Build contact commands dynamically — null entries are skipped
   const contactCmds = Object.entries(CONFIG.contact)
     .filter(([, v]) => v !== null)
     .reduce((acc, [key, value]) => {
@@ -448,13 +469,32 @@ function Contact() {
 
   useEffect(() => { if (logRef.current) logRef.current.scrollTop = logRef.current.scrollHeight; }, [log]);
 
+  // quick-tap buttons for mobile
+  const quickCmds = ["help", ...Object.keys(contactCmds), "location"];
+
   return (
     <div style={{ maxWidth: 700, margin: "0 auto" }}>
       <SectionHeader cmd="nc -l 4444  # listening for connections" />
       <Terminal title="contact — interactive shell">
-        <div ref={logRef} style={{ height: 280, overflowY: "auto", marginBottom: 12, scrollbarWidth: "thin", scrollbarColor: "#003300 transparent" }}>
+        {/* Quick tap buttons for mobile */}
+        <div className="quick-cmds" style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 12 }}>
+          {quickCmds.map(cmd => (
+            <button key={cmd} onClick={() => {
+              const result = commands[cmd] ? commands[cmd]() : [];
+              setLog(prev => [...prev, { type: "cmd", text: cmd }, ...(result || [])]);
+            }} style={{
+              background: "transparent", border: "1px solid #003300", color: "#336633",
+              fontFamily: "monospace", fontSize: 11, padding: "3px 10px",
+              cursor: "pointer", borderRadius: 2, letterSpacing: 1,
+            }}>
+              {cmd}
+            </button>
+          ))}
+        </div>
+
+        <div ref={logRef} style={{ height: 240, overflowY: "auto", marginBottom: 12, scrollbarWidth: "thin", scrollbarColor: "#003300 transparent" }}>
           {log.map((entry, i) => (
-            <div key={i} style={{ marginBottom: 4, fontFamily: "monospace", fontSize: 12 }}>
+            <div key={i} style={{ marginBottom: 4, fontFamily: "monospace", fontSize: "clamp(10px,2.5vw,12px)", wordBreak: "break-word" }}>
               {entry.type === "cmd"  && <div><span style={{ color: "#00ff41" }}>{PROMPT}</span> <span style={{ color: "#e0ffe0" }}>{entry.text}</span></div>}
               {entry.type === "out"  && <div style={{ color: "#88aa88", paddingLeft: 2 }}>{entry.text}</div>}
               {entry.type === "sys"  && <div style={{ color: "#004400" }}>[SYS] {entry.text}</div>}
@@ -464,15 +504,17 @@ function Contact() {
           ))}
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8, borderTop: "1px solid #001400", paddingTop: 10 }}>
-          <span style={{ color: "#00ff41", fontFamily: "monospace", fontSize: 12, flexShrink: 0 }}>{PROMPT}</span>
+          <span style={{ color: "#00ff41", fontFamily: "monospace", fontSize: "clamp(10px,2.5vw,12px)", flexShrink: 0 }}>{PROMPT}</span>
           <input
+            ref={inputRef}
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={e => { if (e.key === "Enter") handleCmd(); }}
-            autoFocus
-            style={{ background: "transparent", border: "none", outline: "none", color: "#e0ffe0", fontFamily: "monospace", fontSize: 12, flex: 1, caretColor: "#00ff41" }}
+            style={{ background: "transparent", border: "none", outline: "none", color: "#e0ffe0", fontFamily: "monospace", fontSize: "clamp(10px,2.5vw,12px)", flex: 1, caretColor: "#00ff41", minWidth: 0 }}
             placeholder="type a command..."
           />
+          {/* Send button for mobile keyboards */}
+          <button onClick={handleCmd} style={{ background: "transparent", border: "1px solid #003300", color: "#00ff41", fontFamily: "monospace", fontSize: 11, padding: "3px 8px", cursor: "pointer", borderRadius: 2, flexShrink: 0 }}>↵</button>
         </div>
       </Terminal>
     </div>
@@ -528,15 +570,31 @@ export default function App() {
           content:''; position:fixed; top:0;left:0;right:0;bottom:0; pointer-events:none; z-index:9999;
           background: repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.03) 2px,rgba(0,0,0,0.03) 4px);
         }
+
+        /* Desktop nav visible, mobile hidden by default */
+        .desktop-nav { display: flex; }
+        .mobile-menu-btn { display: none; }
+        .mobile-nav { display: none; }
+
+        @media (max-width: 600px) {
+          .desktop-nav { display: none !important; }
+          .mobile-menu-btn { display: block !important; }
+          .mobile-nav { display: block !important; }
+          .quick-cmds { display: flex !important; }
+        }
+
+        @media (min-width: 601px) {
+          .quick-cmds { display: none !important; }
+        }
       `}</style>
 
       <MatrixRain />
       <Nav active={section} onNav={setSection} />
 
-      <main style={{ minHeight: "100vh", paddingTop: 80, paddingBottom: 80, position: "relative", zIndex: 1 }}>
+      <main style={{ minHeight: "100vh", paddingTop: 70, paddingBottom: 40, position: "relative", zIndex: 1 }}>
         <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.7) 100%)", pointerEvents: "none", zIndex: 2 }} />
 
-        <div key={section} className="section-enter" style={{ padding: "40px 24px", position: "relative", zIndex: 3 }}>
+        <div key={section} className="section-enter" style={{ padding: "24px 16px", position: "relative", zIndex: 3 }}>
           {sections[section]}
         </div>
 
@@ -544,12 +602,12 @@ export default function App() {
         <div style={{
           position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 100,
           background: "rgba(0,20,0,0.95)", borderTop: "1px solid #001a00",
-          padding: "4px 20px", display: "flex", justifyContent: "space-between", alignItems: "center",
+          padding: "4px 12px", display: "flex", justifyContent: "space-between", alignItems: "center",
         }}>
-          <span style={{ fontFamily: "monospace", fontSize: 10, color: "#003300", letterSpacing: 2 }}>
-            INSERT — {section.toUpperCase()} — UTF-8 — LF
+          <span style={{ fontFamily: "monospace", fontSize: 9, color: "#003300", letterSpacing: 1 }}>
+            INSERT — {section.toUpperCase()} — UTF-8
           </span>
-          <span style={{ fontFamily: "monospace", fontSize: 10, color: "#003300", letterSpacing: 2 }}>
+          <span style={{ fontFamily: "monospace", fontSize: 9, color: "#003300", letterSpacing: 1 }}>
             {new Date().toLocaleTimeString("en-US", { hour12: false })} {CONFIG.timezone} · {CONFIG.timezoneLabel}
           </span>
         </div>
