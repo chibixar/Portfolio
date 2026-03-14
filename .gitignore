@@ -163,6 +163,8 @@ dist-ssr
 #TERRAFORM
 # Local .terraform directories
 .terraform/
+.terraform*
+
 
 # .tfstate files
 *.tfstate
@@ -207,3 +209,9 @@ terraform.rc
 # planout
 main.tf
 outputs.tf
+variables.tf
+
+
+#ANSIBLE
+all.yml
+inventory.ini

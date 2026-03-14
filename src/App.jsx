@@ -10,7 +10,7 @@ const CONFIG = {
   lastName: "Minkevich",
   handle: "arkadz",           // shell prompt:  handle@hostname:~$
   hostname: "minsk",          // shell hostname
-  domain: "arkadz.dev",       // shown in nav bar
+  domain: "chibixar.com",       // shown in nav bar
   role: "DevOps / Platform Engineer",
   location: "Minsk, Belarus",
   locationCoords: "53.9045° N, 27.5615° E",
