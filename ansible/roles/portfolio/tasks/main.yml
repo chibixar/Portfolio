@@ -11,9 +11,10 @@
       - ca-certificates
       - curl
       - git
+      - openssl
     state: present
 
-# ── Docker
+# ── Docker 
 - name: Add Docker GPG key
   apt_key:
     url: https://download.docker.com/linux/ubuntu/gpg
@@ -39,28 +40,18 @@
     state: started
     enabled: true
 
-# ── App
+# ── App directories 
 - name: Create app directory
   file:
     path: /opt/portfolio
     state: directory
     mode: "0755"
 
-- name: Take docker-compose.yml from template/
-  template:
-    src: docker-compose.yml.j2
-    dest: /opt/portfolio/docker-compose.yml
-
 - name: Create nginx config directory
   file:
     path: /opt/portfolio/nginx/conf
     state: directory
     mode: "0755"
-
-- name: Copy nginx config with domain substituted
-  template:
-    src: default.conf.j2
-    dest: /opt/portfolio/nginx/conf/default.conf
 
 - name: Create certbot directories
   file:
@@ -69,7 +60,33 @@
     mode: "0755"
   loop:
     - /opt/portfolio/certbot/www
-    - /opt/portfolio/certbot/conf
+    - /opt/portfolio/certbot/conf/live/{{ domain }}
+
+# ── Dummy cert so nginx can start before real cert exists
+- name: Check if real cert already exists
+  stat:
+    path: /opt/portfolio/certbot/conf/live/{{ domain }}/fullchain.pem
+  register: real_cert
+
+- name: Generate dummy self-signed certificate
+  shell: |
+    openssl req -x509 -nodes -newkey rsa:2048 \
+      -keyout /opt/portfolio/certbot/conf/live/{{ domain }}/privkey.pem \
+      -out /opt/portfolio/certbot/conf/live/{{ domain }}/fullchain.pem \
+      -days 1 \
+      -subj "/CN={{ domain }}"
+  when: not real_cert.stat.exists
+
+# ── Copy files
+- name: Copy docker-compose.yml
+  template:
+    src: docker-compose.yml.j2
+    dest: /opt/portfolio/docker-compose.yml
+
+- name: Copy nginx config with domain substituted
+  template:
+    src: default.conf.j2
+    dest: /opt/portfolio/nginx/conf/default.conf
 
 # ── Pull and start
 - name: Pull latest image from GHCR
@@ -82,8 +99,8 @@
     project_src: /opt/portfolio
     state: present
 
-# ── SSL
-- name: Issue SSL certificate
+# ── Issue real SSL cert
+- name: Issue SSL certificate via certbot
   command: >
     docker compose run --rm certbot certbot certonly
     --webroot
@@ -95,6 +112,13 @@
     -d {{ domain }}
   args:
     chdir: /opt/portfolio
+  when: not real_cert.stat.exists
   register: certbot_result
   changed_when: "'Successfully received certificate' in certbot_result.stdout"
-  failed_when: certbot_result.rc != 0 and 'Certificate not yet due for renewal' not in certbot_result.stdout
+
+# ── Reload nginx with real cert
+- name: Reload nginx after cert is issued
+  command: docker compose exec nginx nginx -s reload
+  args:
+    chdir: /opt/portfolio
+  when: not real_cert.stat.exists
