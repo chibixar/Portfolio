@@ -1,5 +1,5 @@
 ---
-# ── System
+# System 
 - name: Update apt cache
   apt:
     update_cache: true
@@ -14,7 +14,7 @@
       - openssl
     state: present
 
-# ── Docker 
+# Docker
 - name: Add Docker GPG key
   apt_key:
     url: https://download.docker.com/linux/ubuntu/gpg
@@ -40,7 +40,7 @@
     state: started
     enabled: true
 
-# ── App directories 
+# App directories 
 - name: Create app directory
   file:
     path: /opt/portfolio
@@ -61,23 +61,36 @@
   loop:
     - /opt/portfolio/certbot/www
     - /opt/portfolio/certbot/conf/live/{{ domain }}
+    - /opt/portfolio/certbot/conf/live/status.{{ domain }}
 
-# ── Dummy cert so nginx can start before real cert exists
-- name: Check if real cert already exists
+# Dummy certs so nginx can start
+- name: Check if real cert exists for main domain
   stat:
     path: /opt/portfolio/certbot/conf/live/{{ domain }}/fullchain.pem
   register: real_cert
 
-- name: Generate dummy self-signed certificate
+- name: Check if real cert exists for status subdomain
+  stat:
+    path: /opt/portfolio/certbot/conf/live/status.{{ domain }}/fullchain.pem
+  register: real_cert_status
+
+- name: Generate dummy cert for main domain
   shell: |
     openssl req -x509 -nodes -newkey rsa:2048 \
       -keyout /opt/portfolio/certbot/conf/live/{{ domain }}/privkey.pem \
       -out /opt/portfolio/certbot/conf/live/{{ domain }}/fullchain.pem \
-      -days 1 \
-      -subj "/CN={{ domain }}"
+      -days 1 -subj "/CN={{ domain }}"
   when: not real_cert.stat.exists
 
-# ── Copy files
+- name: Generate dummy cert for status subdomain
+  shell: |
+    openssl req -x509 -nodes -newkey rsa:2048 \
+      -keyout /opt/portfolio/certbot/conf/live/status.{{ domain }}/privkey.pem \
+      -out /opt/portfolio/certbot/conf/live/status.{{ domain }}/fullchain.pem \
+      -days 1 -subj "/CN=status.{{ domain }}"
+  when: not real_cert_status.stat.exists
+
+# Copy files
 - name: Copy docker-compose.yml
   template:
     src: docker-compose.yml.j2
@@ -88,7 +101,7 @@
     src: default.conf.j2
     dest: /opt/portfolio/nginx/conf/default.conf
 
-# ── Pull and start
+# Pull and start
 - name: Pull latest image from GHCR
   community.docker.docker_image:
     name: "{{ ghcr_image }}"
@@ -99,8 +112,8 @@
     project_src: /opt/portfolio
     state: present
 
-# ── Issue real SSL cert
-- name: Issue SSL certificate via certbot
+# Issue real SSL certs
+- name: Issue SSL certificate for main domain
   command: >
     docker compose run --rm certbot certbot certonly
     --webroot
@@ -116,9 +129,25 @@
   register: certbot_result
   changed_when: "'Successfully received certificate' in certbot_result.stdout"
 
-# ── Reload nginx with real cert
-- name: Reload nginx after cert is issued
+- name: Issue SSL certificate for status subdomain
+  command: >
+    docker compose run --rm certbot certbot certonly
+    --webroot
+    --webroot-path=/var/www/certbot
+    --email {{ email }}
+    --agree-tos
+    --no-eff-email
+    --non-interactive
+    -d status.{{ domain }}
+  args:
+    chdir: /opt/portfolio
+  when: not real_cert_status.stat.exists
+  register: certbot_status_result
+  changed_when: "'Successfully received certificate' in certbot_status_result.stdout"
+
+#Reload nginx with real certs 
+- name: Reload nginx after certs are issued
   command: docker compose exec nginx nginx -s reload
   args:
     chdir: /opt/portfolio
-  when: not real_cert.stat.exists
+  when: not real_cert.stat.exists or not real_cert_status.stat.exists
