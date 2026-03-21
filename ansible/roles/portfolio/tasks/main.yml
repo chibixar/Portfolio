@@ -1,5 +1,5 @@
 ---
-# System 
+# System
 - name: Update apt cache
   apt:
     update_cache: true
@@ -14,7 +14,7 @@
       - openssl
     state: present
 
-# Docker
+#  Docker
 - name: Add Docker GPG key
   apt_key:
     url: https://download.docker.com/linux/ubuntu/gpg
@@ -53,26 +53,42 @@
     state: directory
     mode: "0755"
 
-- name: Create certbot directories
+- name: Create certbot www directory
   file:
-    path: "{{ item }}"
+    path: /opt/portfolio/certbot/www
     state: directory
     mode: "0755"
-  loop:
-    - /opt/portfolio/certbot/www
-    - /opt/portfolio/certbot/conf/live/{{ domain }}
-    - /opt/portfolio/certbot/conf/live/status.{{ domain }}
 
-# Dummy certs so nginx can start
+- name: Create certbot conf directory
+  file:
+    path: /opt/portfolio/certbot/conf
+    state: directory
+    mode: "0755"
+
+#  Check which certs already exist 
 - name: Check if real cert exists for main domain
-  stat:
-    path: /opt/portfolio/certbot/conf/live/{{ domain }}/fullchain.pem
+  shell: |
+    openssl x509 -in /opt/portfolio/certbot/conf/live/{{ domain }}/fullchain.pem \
+      -noout -issuer 2>/dev/null | grep -q "Let's Encrypt"
   register: real_cert
+  failed_when: false
+  changed_when: false
 
 - name: Check if real cert exists for status subdomain
-  stat:
-    path: /opt/portfolio/certbot/conf/live/status.{{ domain }}/fullchain.pem
+  shell: |
+    openssl x509 -in /opt/portfolio/certbot/conf/live/status.{{ domain }}/fullchain.pem \
+      -noout -issuer 2>/dev/null | grep -q "Let's Encrypt"
   register: real_cert_status
+  failed_when: false
+  changed_when: false
+
+#  Dummy certs only if real ones don't exist
+- name: Create dummy cert directory for main domain
+  file:
+    path: /opt/portfolio/certbot/conf/live/{{ domain }}
+    state: directory
+    mode: "0755"
+  when: real_cert.rc != 0
 
 - name: Generate dummy cert for main domain
   shell: |
@@ -80,7 +96,14 @@
       -keyout /opt/portfolio/certbot/conf/live/{{ domain }}/privkey.pem \
       -out /opt/portfolio/certbot/conf/live/{{ domain }}/fullchain.pem \
       -days 1 -subj "/CN={{ domain }}"
-  when: not real_cert.stat.exists
+  when: real_cert.rc != 0
+
+- name: Create dummy cert directory for status subdomain
+  file:
+    path: /opt/portfolio/certbot/conf/live/status.{{ domain }}
+    state: directory
+    mode: "0755"
+  when: real_cert_status.rc != 0
 
 - name: Generate dummy cert for status subdomain
   shell: |
@@ -88,15 +111,15 @@
       -keyout /opt/portfolio/certbot/conf/live/status.{{ domain }}/privkey.pem \
       -out /opt/portfolio/certbot/conf/live/status.{{ domain }}/fullchain.pem \
       -days 1 -subj "/CN=status.{{ domain }}"
-  when: not real_cert_status.stat.exists
+  when: real_cert_status.rc != 0
 
-# Copy files
+#  Copy files
 - name: Copy docker-compose.yml
   template:
     src: docker-compose.yml.j2
     dest: /opt/portfolio/docker-compose.yml
 
-- name: Copy nginx config with domain substituted
+- name: Copy nginx config
   template:
     src: default.conf.j2
     dest: /opt/portfolio/nginx/conf/default.conf
@@ -112,42 +135,55 @@
     project_src: /opt/portfolio
     state: present
 
-# Issue real SSL certs
-- name: Issue SSL certificate for main domain
+# Issue real certs — stop certbot first to avoid lock conflicts
+- name: Stop certbot renewal container before issuing certs
+  community.docker.docker_compose_v2:
+    project_src: /opt/portfolio
+    services:
+      - certbot
+    state: absent
+  when: real_cert.rc != 0 or real_cert_status.rc != 0
+
+- name: Issue real cert for main domain
   command: >
-    docker compose run --rm certbot certbot certonly
+    docker run --rm
+    -v /opt/portfolio/certbot/www:/var/www/certbot
+    -v /opt/portfolio/certbot/conf:/etc/letsencrypt
+    certbot/certbot certonly
     --webroot
     --webroot-path=/var/www/certbot
     --email {{ email }}
     --agree-tos
     --no-eff-email
     --non-interactive
+    --force-renewal
     -d {{ domain }}
-  args:
-    chdir: /opt/portfolio
-  when: not real_cert.stat.exists
-  register: certbot_result
-  changed_when: "'Successfully received certificate' in certbot_result.stdout"
+  when: real_cert.rc != 0
 
-- name: Issue SSL certificate for status subdomain
+- name: Issue real cert for status subdomain
   command: >
-    docker compose run --rm certbot certbot certonly
+    docker run --rm
+    -v /opt/portfolio/certbot/www:/var/www/certbot
+    -v /opt/portfolio/certbot/conf:/etc/letsencrypt
+    certbot/certbot certonly
     --webroot
     --webroot-path=/var/www/certbot
     --email {{ email }}
     --agree-tos
     --no-eff-email
     --non-interactive
+    --force-renewal
     -d status.{{ domain }}
-  args:
-    chdir: /opt/portfolio
-  when: not real_cert_status.stat.exists
-  register: certbot_status_result
-  changed_when: "'Successfully received certificate' in certbot_status_result.stdout"
+  when: real_cert_status.rc != 0
 
-#Reload nginx with real certs 
-- name: Reload nginx after certs are issued
+# Restart certbot and reload nginx
+- name: Start all containers
+  community.docker.docker_compose_v2:
+    project_src: /opt/portfolio
+    state: present
+
+- name: Reload nginx with real certs
   command: docker compose exec nginx nginx -s reload
   args:
     chdir: /opt/portfolio
-  when: not real_cert.stat.exists or not real_cert_status.stat.exists
+  when: real_cert.rc != 0 or real_cert_status.rc != 0

@@ -9,7 +9,7 @@ const CONFIG = {
   lastName: "Minkevich",
   handle: "arkadz",
   hostname: "minsk",
-  domain: "chibixar.com",
+  domain: "arkadz.dev",
   role: "DevOps / Platform Engineer",
   location: "Minsk, Belarus",
   locationCoords: "53.9045° N, 27.5615° E",
@@ -29,7 +29,7 @@ const CONFIG = {
     {
       group: "infrastructure/",
       items: [
-        { name: "Terraform",  level: 92 },
+        { name: "Terraform",  level: 82 },
         { name: "Ansible",    level: 88 },
         { name: "Docker",     level: 90 },
         { name: "Linux/Bash", level: 95 },
@@ -39,17 +39,55 @@ const CONFIG = {
       group: "delivery/",
       items: [
         { name: "GitHub Actions", level: 88 },
-        { name: "Nginx",          level: 82 },
-        { name: "Cloudflare DNS", level: 98 },
+        { name: "Nginx",          level: 88 },
+        { name: "Cloudflare DNS", level: 99 },
         { name: "Git",            level: 90 },
       ],
+    },
+  ],
+  // Timeline entries — newest first
+  timeline: [
+    {
+      date: "2026 — present",
+      title: "Portfolio Infrastructure",
+      desc: "Built and deployed this portfolio using Terraform, Ansible, GitHub Actions, Docker, and Nginx on a cloud VPS. Full IaC pipeline.",
+      tags: ["terraform", "ansible", "docker", "nginx", "github-actions"],
+      type: "project",
+    },
+    {
+      date: "2026",
+      title: "Self-hosted Homelab v2",
+      desc: "Upgraded from Dell Inspiron to a dedicated cloud VPS. Deployed Pi-hole DNS, WireGuard VPN, and Uptime Kuma monitoring.",
+      tags: ["self-hosted", "wireguard", "pi-hole", "linux"],
+      type: "milestone",
+    },
+    {
+      date: "2025 — 2026",
+      title: "Innowise DevOps Practice Course",
+      desc: "Completed hands-on DevOps course covering Linux administration, Git workflows, Docker containerisation, and Ansible automation.",
+      tags: ["linux", "docker", "ansible", "git"],
+      type: "education",
+    },
+    {
+      date: "2025",
+      title: "First Homelab",
+      desc: "Started homelabbing on a Dell Inspiron 15 — self-hosted services, bare-metal Linux, local networking. Where the obsession began.",
+      tags: ["homelab", "linux", "bare-metal"],
+      type: "milestone",
+    },
+    {
+      date: "2025",
+      title: "Started Learning DevOps",
+      desc: "Began learning Linux, networking fundamentals, and shell scripting. First steps into infrastructure and automation.",
+      tags: ["linux", "bash", "networking"],
+      type: "education",
     },
   ],
   projects: [
     {
       name: "do-vpn-infra",
-      desc: "Production-ready WireGuard VPN on a DigitalOcean VPC. Nginx reverse proxy handles traffic routing; provisioned with Terraform, configured with Ansible.",
-      tags: ["digitalocean", "wireguard", "nginx", "terraform", "ansible"],
+      desc: "Production-ready WireGuard VPN on a cloud VPC. Nginx reverse proxy handles traffic routing; provisioned with Terraform, configured with Ansible.",
+      tags: ["wireguard", "nginx", "terraform", "ansible"],
       status: "active",
     },
     {
@@ -117,40 +155,89 @@ function useTypewriter(text, speed = 40, startDelay = 0) {
   return { displayed, done };
 }
 
-// ─── Matrix Rain ───────────────────────────────────────────────────────────────
-function MatrixRain() {
+// ─── Network Background ────────────────────────────────────────────────────────
+function NetworkBackground() {
   const canvasRef = useRef(null);
   useEffect(() => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
     let animId;
-    const resize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; };
+
+    const resize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
     resize();
     window.addEventListener("resize", resize);
-    const chars = "アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ<>{}[]|/\\;:".split("");
-    const fontSize = 13;
-    let cols = Math.floor(canvas.width / fontSize);
-    let drops = Array(cols).fill(1);
+
+    const isMobile = () => window.innerWidth < 600;
+    const nodeCount = () => isMobile() ? 30 : 60;
+
+    let nodes = [];
+    const initNodes = () => {
+      nodes = Array.from({ length: nodeCount() }, () => ({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        vx: (Math.random() - 0.5) * 0.4,
+        vy: (Math.random() - 0.5) * 0.4,
+        r: Math.random() * 1.5 + 0.5,
+        pulse: Math.random() * Math.PI * 2,
+      }));
+    };
+    initNodes();
+
+    const maxDist = isMobile() ? 100 : 150;
+
     const draw = () => {
-      ctx.fillStyle = "rgba(0,0,0,0.05)";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      cols = Math.floor(canvas.width / fontSize);
-      if (drops.length !== cols) drops = Array(cols).fill(1);
-      for (let i = 0; i < drops.length; i++) {
-        const ch = chars[Math.floor(Math.random() * chars.length)];
-        const bright = Math.random() > 0.95;
-        ctx.fillStyle = bright ? "#ffffff" : (Math.random() > 0.7 ? "#00ff41" : "#003b00");
-        ctx.font = `${fontSize}px monospace`;
-        ctx.fillText(ch, i * fontSize, drops[i] * fontSize);
-        if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
-        drops[i]++;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // update
+      nodes.forEach(n => {
+        n.x += n.vx;
+        n.y += n.vy;
+        n.pulse += 0.02;
+        if (n.x < 0 || n.x > canvas.width) n.vx *= -1;
+        if (n.y < 0 || n.y > canvas.height) n.vy *= -1;
+      });
+
+      // draw connections
+      for (let i = 0; i < nodes.length; i++) {
+        for (let j = i + 1; j < nodes.length; j++) {
+          const dx = nodes[i].x - nodes[j].x;
+          const dy = nodes[i].y - nodes[j].y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < maxDist) {
+            const alpha = (1 - dist / maxDist) * 0.15;
+            ctx.beginPath();
+            ctx.moveTo(nodes[i].x, nodes[i].y);
+            ctx.lineTo(nodes[j].x, nodes[j].y);
+            ctx.strokeStyle = `rgba(0,255,65,${alpha})`;
+            ctx.lineWidth = 0.5;
+            ctx.stroke();
+          }
+        }
       }
+
+      // draw nodes
+      nodes.forEach(n => {
+        const pulse = Math.sin(n.pulse) * 0.5 + 0.5;
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, n.r + pulse * 0.8, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(0,255,65,${0.3 + pulse * 0.4})`;
+        ctx.fill();
+      });
+
       animId = requestAnimationFrame(draw);
     };
     draw();
-    return () => { cancelAnimationFrame(animId); window.removeEventListener("resize", resize); };
+
+    return () => {
+      cancelAnimationFrame(animId);
+      window.removeEventListener("resize", resize);
+    };
   }, []);
-  return <canvas ref={canvasRef} style={{ position: "fixed", top: 0, left: 0, zIndex: 0, opacity: 0.18, pointerEvents: "none" }} />;
+
+  return <canvas ref={canvasRef} style={{ position: "fixed", top: 0, left: 0, zIndex: 0, opacity: 1, pointerEvents: "none" }} />;
 }
 
 // ─── Glitch Text ───────────────────────────────────────────────────────────────
@@ -162,13 +249,86 @@ function GlitchText({ text }) {
   );
 }
 
+// ─── 3D Hero Terminal ─────────────────────────────────────────────────────────
+function HeroTerminal3D({ children, title }) {
+  const wrapRef = useRef(null);
+  const rotRef = useRef({ x: 0, y: 0 });
+  const targetRef = useRef({ x: 0, y: 0 });
+  const frameRef = useRef(null);
+  const hoveredRef = useRef(false);
+
+  useEffect(() => {
+    if (window.innerWidth < 640) return;
+    const el = wrapRef.current;
+    if (!el) return;
+
+    const onMove = (e) => {
+      if (!hoveredRef.current) return;
+      const rect = el.getBoundingClientRect();
+      const dx = (e.clientX - (rect.left + rect.width / 2)) / (rect.width / 2);
+      const dy = (e.clientY - (rect.top + rect.height / 2)) / (rect.height / 2);
+      targetRef.current = { x: dy * -7, y: dx * 7 };
+    };
+    const onEnter = () => { hoveredRef.current = true; };
+    const onLeave = () => { hoveredRef.current = false; targetRef.current = { x: 0, y: 0 }; };
+
+    const tick = () => {
+      rotRef.current.x += (targetRef.current.x - rotRef.current.x) * 0.08;
+      rotRef.current.y += (targetRef.current.y - rotRef.current.y) * 0.08;
+      const { x, y } = rotRef.current;
+      // Only apply when actually tilted — snaps back cleanly to flat
+      if (Math.abs(x) > 0.05 || Math.abs(y) > 0.05) {
+        el.style.transform = `perspective(1200px) rotateX(${x}deg) rotateY(${y}deg)`;
+        const g = (Math.abs(x) + Math.abs(y)) * 1.2;
+        el.style.filter = `drop-shadow(0 ${4 + g}px ${20 + g * 2}px rgba(0,255,65,${0.15 + g * 0.008}))`;
+      } else {
+        el.style.transform = "";
+        el.style.filter = "drop-shadow(0 4px 20px rgba(0,255,65,0.15))";
+      }
+      frameRef.current = requestAnimationFrame(tick);
+    };
+
+    el.addEventListener("mouseenter", onEnter);
+    el.addEventListener("mouseleave", onLeave);
+    window.addEventListener("mousemove", onMove);
+    tick();
+    return () => {
+      el.removeEventListener("mouseenter", onEnter);
+      el.removeEventListener("mouseleave", onLeave);
+      window.removeEventListener("mousemove", onMove);
+      cancelAnimationFrame(frameRef.current);
+    };
+  }, []);
+
+  return (
+    <div ref={wrapRef} style={{ borderRadius: 4, transition: "filter 0.4s ease", willChange: "transform" }}>
+      <div style={{
+        background: "rgba(0,8,0,0.92)", border: "1px solid #00ff41", borderRadius: 4,
+        fontFamily: "'JetBrains Mono','Fira Code',monospace", overflow: "hidden",
+        boxShadow: "0 0 0 1px rgba(0,255,65,0.08), 0 20px 60px rgba(0,0,0,0.7), inset 0 0 40px rgba(0,0,0,0.4)",
+      }}>
+        <div style={{ background: "#001400", borderBottom: "1px solid #00ff41", padding: "6px 12px", display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}>
+          <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#ff5f57", flexShrink: 0, display: "inline-block", boxShadow: "0 0 6px #ff5f57" }} />
+          <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#febc2e", flexShrink: 0, display: "inline-block", boxShadow: "0 0 6px #febc2e" }} />
+          <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#28c840", flexShrink: 0, display: "inline-block", boxShadow: "0 0 6px #28c840" }} />
+          <span style={{ color: "#00aa2a", fontSize: 11, marginLeft: 8, letterSpacing: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{title}</span>
+        </div>
+        <div style={{ padding: "16px 20px", overflowX: "auto" }}>{children}</div>
+        <div style={{ height: 2, background: "linear-gradient(90deg,transparent,rgba(0,255,65,0.3),transparent)" }} />
+      </div>
+    </div>
+  );
+}
+
+
+
 // ─── Terminal Window ───────────────────────────────────────────────────────────
 function Terminal({ title = "terminal", children, style = {} }) {
   return (
     <div style={{
-      background: "rgba(0,8,0,0.88)", border: "1px solid #00ff41", borderRadius: 4,
+      background: "rgba(0,8,0,0.92)", border: "1px solid #00ff41", borderRadius: 4,
       fontFamily: "'JetBrains Mono', 'Fira Code', monospace", overflow: "hidden",
-      boxShadow: "0 0 30px rgba(0,255,65,0.15), inset 0 0 30px rgba(0,0,0,0.5)",
+      boxShadow: "0 0 30px rgba(0,255,65,0.12), inset 0 0 30px rgba(0,0,0,0.5)",
       ...style,
     }}>
       <div style={{ background: "#001400", borderBottom: "1px solid #00ff41", padding: "6px 12px", display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}>
@@ -230,7 +390,7 @@ function ProjectCard({ name, desc, tags, status }) {
       onMouseLeave={() => setHovered(false)}
       style={{
         border: `1px solid ${hovered ? "#00ff41" : "#003300"}`,
-        background: hovered ? "rgba(0,255,65,0.04)" : "rgba(0,8,0,0.6)",
+        background: hovered ? "rgba(0,255,65,0.04)" : "rgba(0,8,0,0.85)",
         borderRadius: 4, padding: "16px 18px",
         transition: "all 0.25s ease",
         boxShadow: hovered ? "0 0 20px rgba(0,255,65,0.1)" : "none",
@@ -250,6 +410,65 @@ function ProjectCard({ name, desc, tags, status }) {
   );
 }
 
+// ─── Timeline Entry ───────────────────────────────────────────────────────────
+function TimelineEntry({ entry, index }) {
+  const [visible, setVisible] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([e]) => { if (e.isIntersecting) setVisible(true); },
+      { threshold: 0.2 }
+    );
+    if (ref.current) observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, []);
+
+  const typeColor = entry.type === "education" ? "#4488ff" : entry.type === "milestone" ? "#00ff41" : "#aa44ff";
+  const typeLabel = entry.type === "education" ? "EDU" : entry.type === "milestone" ? "MILESTONE" : "PROJECT";
+
+  return (
+    <div ref={ref} style={{
+      display: "flex", gap: 16, alignItems: "flex-start",
+      opacity: visible ? 1 : 0,
+      transform: visible ? "translateY(0)" : "translateY(20px)",
+      transition: `opacity 0.5s ease ${index * 0.1}s, transform 0.5s ease ${index * 0.1}s`,
+    }}>
+      {/* Left column — date + line */}
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", flexShrink: 0, width: 80 }}>
+        <span style={{ fontFamily: "monospace", fontSize: 10, color: "#336633", letterSpacing: 1, textAlign: "right", width: "100%", whiteSpace: "nowrap" }}>{entry.date}</span>
+        <div style={{ width: 1, flex: 1, minHeight: 40, background: "linear-gradient(180deg, #003300, transparent)", marginTop: 8 }} />
+      </div>
+
+      {/* Dot */}
+      <div style={{ flexShrink: 0, marginTop: 2 }}>
+        <div style={{
+          width: 10, height: 10, borderRadius: "50%",
+          background: typeColor,
+          boxShadow: `0 0 8px ${typeColor}`,
+          border: "2px solid #000400",
+        }} />
+      </div>
+
+      {/* Content */}
+      <div style={{
+        flex: 1, background: "rgba(0,8,0,0.85)", border: "1px solid #002200",
+        borderRadius: 4, padding: "12px 16px", marginBottom: 20,
+        fontFamily: "monospace",
+      }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8, marginBottom: 6, flexWrap: "wrap" }}>
+          <span style={{ color: "#00ff41", fontSize: "clamp(12px,2.5vw,14px)", fontWeight: 700, letterSpacing: 1 }}>{entry.title}</span>
+          <span style={{ fontSize: 9, padding: "2px 6px", border: `1px solid ${typeColor}`, color: typeColor, borderRadius: 2, letterSpacing: 2, flexShrink: 0 }}>{typeLabel}</span>
+        </div>
+        <p style={{ color: "#88aa88", fontSize: "clamp(11px,2vw,12px)", lineHeight: 1.6, margin: "0 0 10px" }}>{entry.desc}</p>
+        <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
+          {entry.tags.map(t => <span key={t} style={{ fontSize: 9, color: "#004400", background: "#001400", border: "1px solid #002800", padding: "2px 5px", borderRadius: 2, letterSpacing: 1 }}>{t}</span>)}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Section Header ────────────────────────────────────────────────────────────
 function SectionHeader({ cmd }) {
   const { displayed } = useTypewriter(cmd, 30, 100);
@@ -264,37 +483,33 @@ function SectionHeader({ cmd }) {
 
 // ─── Nav ───────────────────────────────────────────────────────────────────────
 function Nav({ active, onNav }) {
-  const links = ["whoami", "skills", "projects", "infra", "contact"];
+  const links = ["whoami", "skills", "projects", "timeline", "infra", "contact"];
   const [menuOpen, setMenuOpen] = useState(false);
   return (
     <nav style={{
       position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
-      background: "rgba(0,4,0,0.95)", borderBottom: "1px solid #001a00",
+      background: "rgba(0,4,0,0.97)", borderBottom: "1px solid #001a00",
       backdropFilter: "blur(10px)",
     }}>
-      <div style={{ padding: "12px 16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <div style={{ color: "#00ff41", fontFamily: "monospace", fontSize: "clamp(11px,3vw,13px)", letterSpacing: 2 }}>
+      <div style={{ padding: "10px 16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <div style={{ color: "#00ff41", fontFamily: "monospace", fontSize: "clamp(10px,2.5vw,13px)", letterSpacing: 2 }}>
           <span style={{ color: "#005500" }}>root@</span>
           <GlitchText text={CONFIG.domain} />
         </div>
-
-        {/* Desktop nav */}
-        <div className="desktop-nav" style={{ display: "flex", gap: 4 }}>
+        <div className="desktop-nav" style={{ display: "flex", gap: 2 }}>
           {links.map(l => (
             <button key={l} onClick={() => onNav(l)} style={{
               background: active === l ? "rgba(0,255,65,0.1)" : "transparent",
               border: active === l ? "1px solid #00ff41" : "1px solid transparent",
               color: active === l ? "#00ff41" : "#336633",
-              fontFamily: "monospace", fontSize: 11, letterSpacing: 2,
-              padding: "5px 10px", cursor: "pointer", borderRadius: 2,
+              fontFamily: "monospace", fontSize: "clamp(9px,1.5vw,11px)", letterSpacing: 1,
+              padding: "4px 8px", cursor: "pointer", borderRadius: 2,
               transition: "all 0.2s ease",
             }}>
               {active === l && "["}{l}{active === l && "]"}
             </button>
           ))}
         </div>
-
-        {/* Mobile hamburger */}
         <button
           className="mobile-menu-btn"
           onClick={() => setMenuOpen(o => !o)}
@@ -303,8 +518,6 @@ function Nav({ active, onNav }) {
           {menuOpen ? "✕" : "☰"}
         </button>
       </div>
-
-      {/* Mobile dropdown */}
       {menuOpen && (
         <div className="mobile-nav" style={{ borderTop: "1px solid #001a00", padding: "8px 16px 12px" }}>
           {links.map(l => (
@@ -325,28 +538,82 @@ function Nav({ active, onNav }) {
   );
 }
 
+// ─── 3D Name ──────────────────────────────────────────────────────────────────
+function Name3D() {
+  const ref = useRef(null);
+  const rotRef = useRef({ x: 0, y: 0 });
+  const targetRef = useRef({ x: 0, y: 0 });
+  const frameRef = useRef(null);
+  const activeRef = useRef(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    const onMove = (e) => {
+      if (!activeRef.current) return;
+      const rect = el.getBoundingClientRect();
+      const dx = (e.clientX - (rect.left + rect.width / 2)) / (rect.width / 2);
+      const dy = (e.clientY - (rect.top + rect.height / 2)) / (rect.height / 2);
+      targetRef.current = { x: dy * -18, y: dx * 18 };
+    };
+    const onEnter = () => { activeRef.current = true; };
+    const onLeave = () => { activeRef.current = false; targetRef.current = { x: 0, y: 0 }; };
+
+    const tick = () => {
+      rotRef.current.x += (targetRef.current.x - rotRef.current.x) * 0.07;
+      rotRef.current.y += (targetRef.current.y - rotRef.current.y) * 0.07;
+      const { x, y } = rotRef.current;
+      if (Math.abs(x) > 0.01 || Math.abs(y) > 0.01) {
+        el.style.transform = `perspective(800px) rotateX(${x}deg) rotateY(${y}deg)`;
+      } else {
+        el.style.transform = "";
+      }
+      frameRef.current = requestAnimationFrame(tick);
+    };
+
+    el.addEventListener("mouseenter", onEnter);
+    el.addEventListener("mouseleave", onLeave);
+    el.addEventListener("mousemove", onMove);
+    tick();
+    return () => {
+      el.removeEventListener("mouseenter", onEnter);
+      el.removeEventListener("mouseleave", onLeave);
+      el.removeEventListener("mousemove", onMove);
+      cancelAnimationFrame(frameRef.current);
+    };
+  }, []);
+
+  return (
+    <div ref={ref} style={{ display: "inline-block", cursor: "default", willChange: "transform" }}>
+      <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "clamp(28px,9vw,72px)", fontWeight: 900, color: "#00ff41", letterSpacing: -2, lineHeight: 1, margin: "0 0 4px", textShadow: "0 0 40px rgba(0,255,65,0.4)" }}>
+        <GlitchText text={CONFIG.firstName.toUpperCase()} />
+      </div>
+      <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "clamp(28px,9vw,72px)", fontWeight: 900, color: "#003300", letterSpacing: -2, lineHeight: 1 }}>
+        {CONFIG.lastName.toUpperCase()}
+      </div>
+    </div>
+  );
+}
+
 // ─── Section: whoami ──────────────────────────────────────────────────────────
 function WhoAmI() {
   return (
     <div style={{ maxWidth: 900, margin: "0 auto" }}>
-      <div style={{ marginBottom: 40, textAlign: "center" }}>
+      <div style={{ marginBottom: 48, textAlign: "center" }}>
         <div style={{ fontFamily: "monospace", color: "#003300", fontSize: 11, marginBottom: 16, letterSpacing: 4 }}>INITIALIZING PROFILE...</div>
-        <h1 style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "clamp(32px,10vw,72px)", fontWeight: 900, color: "#00ff41", letterSpacing: -2, lineHeight: 1, textShadow: "0 0 40px rgba(0,255,65,0.5)", margin: "0 0 4px" }}>
-          <GlitchText text={CONFIG.firstName.toUpperCase()} />
-        </h1>
-        <h1 style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "clamp(32px,10vw,72px)", fontWeight: 900, color: "#003300", letterSpacing: -2, lineHeight: 1, margin: "0 0 24px" }}>
-          {CONFIG.lastName.toUpperCase()}
-        </h1>
-        <div style={{ display: "flex", justifyContent: "center", gap: 12, flexWrap: "wrap", marginBottom: 32, padding: "0 8px" }}>
+        <Name3D />
+        <div style={{ display: "flex", justifyContent: "center", gap: 12, flexWrap: "wrap", margin: "24px 0 32px", padding: "0 8px" }}>
           {[CONFIG.role, CONFIG.location].map(tag => (
-            <span key={tag} style={{ fontFamily: "monospace", fontSize: "clamp(10px,2.5vw,12px)", color: "#005500", letterSpacing: 2 }}>// {tag}</span>
+            <span key={tag} style={{ fontFamily: "monospace", fontSize: "clamp(9px,2.5vw,12px)", color: "#005500", letterSpacing: 2 }}>// {tag}</span>
           ))}
         </div>
-        <div style={{ display: "inline-block", background: "#000", border: "1px solid #002200", borderRadius: 3, padding: "3px 14px" }}>
+        <div style={{ display: "inline-block", background: "#000400", border: "1px solid #002200", borderRadius: 3, padding: "3px 14px" }}>
           <span style={{ fontFamily: "monospace", fontSize: 11, color: "#00aa41", letterSpacing: 2 }}>● SYSTEM ONLINE</span>
         </div>
       </div>
-      <Terminal title={`${CONFIG.handle}@${CONFIG.hostname} — bash`}>
+
+      <HeroTerminal3D title={`${CONFIG.handle}@${CONFIG.hostname} — bash`}>
         <Prompt cmd="cat /etc/profile.d/me.conf" delay={400} output={
           <div style={{ fontSize: "clamp(10px,2.5vw,12px)" }}>
             <div><span style={{ color: "#005500" }}>NAME</span>=<span style={{ color: "#00cc41" }}>"{CONFIG.firstName} {CONFIG.lastName}"</span></div>
@@ -361,7 +628,7 @@ function WhoAmI() {
         <Prompt cmd="echo $READY_TO_BUILD" delay={4200} output={
           <span style={{ color: "#00ff41", fontWeight: "bold" }}>true</span>
         } />
-      </Terminal>
+      </HeroTerminal3D>
     </div>
   );
 }
@@ -394,6 +661,167 @@ function Projects() {
   );
 }
 
+// ─── Section: timeline ────────────────────────────────────────────────────────
+function Timeline() {
+  return (
+    <div style={{ maxWidth: 800, margin: "0 auto" }}>
+      <SectionHeader cmd="git log --oneline --graph" />
+      <div style={{ paddingLeft: 4 }}>
+        {CONFIG.timeline.map((entry, i) => (
+          <TimelineEntry key={i} entry={entry} index={i} />
+        ))}
+        {/* Root commit */}
+        <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
+          <div style={{ width: 80, flexShrink: 0 }} />
+          <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#003300", border: "2px solid #005500", flexShrink: 0 }} />
+          <span style={{ fontFamily: "monospace", fontSize: 11, color: "#003300", letterSpacing: 2 }}>// initial commit</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Animated Pipeline Diagram ────────────────────────────────────────────────
+function PipelineDiagram() {
+  const [activeStep, setActiveStep] = useState(-1);
+  const [running, setRunning] = useState(false);
+  const [packets, setPackets] = useState([]);
+  const packetId = useRef(0);
+
+  const steps = [
+    { id: "push",    label: "git push",        icon: "⬆",  sub: "origin main",         color: "#00ff41" },
+    { id: "build",   label: "docker build",     icon: "🔨", sub: "npm ci + vite build",  color: "#44aaff" },
+    { id: "push2",   label: "docker push",      icon: "📦", sub: "→ ghcr.io",            color: "#aa44ff" },
+    { id: "ssh",     label: "ssh deploy",       icon: "🔑", sub: "appleboy/ssh-action",  color: "#ffaa00" },
+    { id: "pull",    label: "docker pull",      icon: "⬇",  sub: "from ghcr.io",         color: "#44aaff" },
+    { id: "up",      label: "compose up",       icon: "🚀", sub: "--no-build -d",         color: "#00ff41" },
+    { id: "live",    label: "live",             icon: "✓",  sub: "chibixar.com",          color: "#00ff41" },
+  ];
+
+  const run = useCallback(() => {
+    if (running) return;
+    setRunning(true);
+    setActiveStep(-1);
+    setPackets([]);
+
+    steps.forEach((_, i) => {
+      setTimeout(() => {
+        setActiveStep(i);
+        // spawn a packet traveling to next step
+        if (i < steps.length - 1) {
+          const id = packetId.current++;
+          setPackets(prev => [...prev, { id, from: i, to: i + 1, progress: 0 }]);
+          const dur = 600;
+          const start = Date.now();
+          const animate = () => {
+            const t = Math.min((Date.now() - start) / dur, 1);
+            setPackets(prev => prev.map(p => p.id === id ? { ...p, progress: t } : p));
+            if (t < 1) requestAnimationFrame(animate);
+            else setPackets(prev => prev.filter(p => p.id !== id));
+          };
+          requestAnimationFrame(animate);
+        }
+        if (i === steps.length - 1) {
+          setTimeout(() => setRunning(false), 800);
+        }
+      }, i * 900);
+    });
+  }, [running]);
+
+  const isMobile = window.innerWidth < 640;
+
+  return (
+    <div style={{ marginTop: 24 }}>
+      <div style={{ fontFamily: "monospace", fontSize: 11, color: "#003300", letterSpacing: 3, marginBottom: 16 }}>
+        // deployment pipeline
+      </div>
+
+      {/* Steps */}
+      <div style={{
+        display: "flex",
+        flexDirection: isMobile ? "column" : "row",
+        alignItems: isMobile ? "flex-start" : "center",
+        gap: 0,
+        position: "relative",
+        overflowX: isMobile ? "visible" : "auto",
+        paddingBottom: 8,
+      }}>
+        {steps.map((step, i) => (
+          <div key={step.id} style={{ display: "flex", flexDirection: isMobile ? "row" : "column", alignItems: "center", position: "relative" }}>
+            {/* Step box */}
+            <div style={{
+              display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+              width: isMobile ? "auto" : 90, minWidth: isMobile ? 0 : 90,
+              padding: isMobile ? "8px 12px" : "10px 8px",
+              background: activeStep >= i ? "rgba(0,255,65,0.08)" : "rgba(0,8,0,0.8)",
+              border: `1px solid ${activeStep >= i ? step.color : "#002200"}`,
+              borderRadius: 4,
+              transition: "all 0.3s ease",
+              boxShadow: activeStep === i ? `0 0 16px ${step.color}44` : "none",
+              flexShrink: 0,
+            }}>
+              <span style={{ fontSize: isMobile ? 16 : 20, marginBottom: isMobile ? 0 : 4, marginRight: isMobile ? 8 : 0 }}>{step.icon}</span>
+              <span style={{ fontFamily: "monospace", fontSize: 10, color: activeStep >= i ? step.color : "#336633", letterSpacing: 1, textAlign: "center", whiteSpace: "nowrap" }}>{step.label}</span>
+              <span style={{ fontFamily: "monospace", fontSize: 8, color: "#003300", textAlign: "center", marginTop: 2, whiteSpace: "nowrap" }}>{step.sub}</span>
+            </div>
+
+            {/* Connector + packet */}
+            {i < steps.length - 1 && (
+              <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center",
+                width: isMobile ? 2 : 32, height: isMobile ? 24 : 2,
+                margin: isMobile ? "0 0 0 20px" : "0",
+                flexShrink: 0,
+              }}>
+                {/* Line */}
+                <div style={{
+                  position: "absolute",
+                  background: activeStep > i ? "#003300" : "#001a00",
+                  width: isMobile ? 2 : "100%",
+                  height: isMobile ? "100%" : 2,
+                  transition: "background 0.3s ease",
+                }} />
+                {/* Animated packet */}
+                {packets.filter(p => p.from === i).map(p => (
+                  <div key={p.id} style={{
+                    position: "absolute",
+                    width: 6, height: 6,
+                    borderRadius: "50%",
+                    background: steps[i].color,
+                    boxShadow: `0 0 8px ${steps[i].color}`,
+                    left: isMobile ? "50%" : `${p.progress * 100}%`,
+                    top: isMobile ? `${p.progress * 100}%` : "50%",
+                    transform: "translate(-50%, -50%)",
+                    pointerEvents: "none",
+                  }} />
+                ))}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* Run button */}
+      <div style={{ marginTop: 20, display: "flex", alignItems: "center", gap: 16 }}>
+        <button onClick={run} disabled={running} style={{
+          background: "transparent",
+          border: `1px solid ${running ? "#003300" : "#00ff41"}`,
+          color: running ? "#003300" : "#00ff41",
+          fontFamily: "monospace", fontSize: 12, letterSpacing: 2,
+          padding: "6px 20px", cursor: running ? "default" : "pointer",
+          borderRadius: 2, transition: "all 0.2s ease",
+        }}>
+          {running ? "▶ running..." : "▶ run pipeline"}
+        </button>
+        {activeStep === steps.length - 1 && !running && (
+          <span style={{ fontFamily: "monospace", fontSize: 11, color: "#00ff41", letterSpacing: 2, animation: "blink 1s infinite" }}>
+            ✓ deployed successfully
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ─── Section: infra ───────────────────────────────────────────────────────────
 function Infra() {
   return (
@@ -419,6 +847,7 @@ function Infra() {
           <div># Nginx terminates TLS; Docker runs the app; Cloudflare handles DNS.</div>
           <div style={{ color: "#00ff41", marginTop: 4 }}>$ terraform apply <span style={{ color: "#004400" }}># idempotent, always</span></div>
         </div>
+        <PipelineDiagram />
       </Terminal>
     </div>
   );
@@ -469,14 +898,12 @@ function Contact() {
 
   useEffect(() => { if (logRef.current) logRef.current.scrollTop = logRef.current.scrollHeight; }, [log]);
 
-  // quick-tap buttons for mobile
   const quickCmds = ["help", ...Object.keys(contactCmds), "location"];
 
   return (
     <div style={{ maxWidth: 700, margin: "0 auto" }}>
       <SectionHeader cmd="nc -l 4444  # listening for connections" />
       <Terminal title="contact — interactive shell">
-        {/* Quick tap buttons for mobile */}
         <div className="quick-cmds" style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 12 }}>
           {quickCmds.map(cmd => (
             <button key={cmd} onClick={() => {
@@ -491,7 +918,6 @@ function Contact() {
             </button>
           ))}
         </div>
-
         <div ref={logRef} style={{ height: 240, overflowY: "auto", marginBottom: 12, scrollbarWidth: "thin", scrollbarColor: "#003300 transparent" }}>
           {log.map((entry, i) => (
             <div key={i} style={{ marginBottom: 4, fontFamily: "monospace", fontSize: "clamp(10px,2.5vw,12px)", wordBreak: "break-word" }}>
@@ -513,7 +939,6 @@ function Contact() {
             style={{ background: "transparent", border: "none", outline: "none", color: "#e0ffe0", fontFamily: "monospace", fontSize: "clamp(10px,2.5vw,12px)", flex: 1, caretColor: "#00ff41", minWidth: 0 }}
             placeholder="type a command..."
           />
-          {/* Send button for mobile keyboards */}
           <button onClick={handleCmd} style={{ background: "transparent", border: "1px solid #003300", color: "#00ff41", fontFamily: "monospace", fontSize: 11, padding: "3px 8px", cursor: "pointer", borderRadius: 2, flexShrink: 0 }}>↵</button>
         </div>
       </Terminal>
@@ -528,6 +953,7 @@ export default function App() {
     whoami:   <WhoAmI />,
     skills:   <Skills />,
     projects: <Projects />,
+    timeline: <Timeline />,
     infra:    <Infra />,
     contact:  <Contact />,
   };
@@ -571,37 +997,37 @@ export default function App() {
           background: repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.03) 2px,rgba(0,0,0,0.03) 4px);
         }
 
-        /* Desktop nav visible, mobile hidden by default */
         .desktop-nav { display: flex; }
         .mobile-menu-btn { display: none; }
         .mobile-nav { display: none; }
 
-        @media (max-width: 600px) {
+        @media (max-width: 640px) {
           .desktop-nav { display: none !important; }
           .mobile-menu-btn { display: block !important; }
           .mobile-nav { display: block !important; }
           .quick-cmds { display: flex !important; }
         }
-
-        @media (min-width: 601px) {
+        @media (min-width: 641px) {
           .quick-cmds { display: none !important; }
         }
       `}</style>
 
-      <MatrixRain />
+      <NetworkBackground />
+
       <Nav active={section} onNav={setSection} />
 
-      <main style={{ minHeight: "100vh", paddingTop: 70, paddingBottom: 40, position: "relative", zIndex: 1 }}>
-        <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.7) 100%)", pointerEvents: "none", zIndex: 2 }} />
+      <main style={{ minHeight: "100vh", paddingTop: 60, paddingBottom: 50, position: "relative", zIndex: 1 }}>
+        {/* Vignette overlay */}
+        <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.75) 100%)", pointerEvents: "none", zIndex: 2 }} />
 
         <div key={section} className="section-enter" style={{ padding: "24px 16px", position: "relative", zIndex: 3 }}>
           {sections[section]}
         </div>
 
-        {/* Vim-style status bar */}
+        {/* Vim status bar */}
         <div style={{
           position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 100,
-          background: "rgba(0,20,0,0.95)", borderTop: "1px solid #001a00",
+          background: "rgba(0,8,0,0.98)", borderTop: "1px solid #001a00",
           padding: "4px 12px", display: "flex", justifyContent: "space-between", alignItems: "center",
         }}>
           <span style={{ fontFamily: "monospace", fontSize: 9, color: "#003300", letterSpacing: 1 }}>
