@@ -9,7 +9,7 @@ const CONFIG = {
   lastName: "Minkevich",
   handle: "arkadz",
   hostname: "minsk",
-  domain: "arkadz.dev",
+  domain: "chibixar.com",
   role: "DevOps / Platform Engineer",
   location: "Minsk, Belarus",
   locationCoords: "53.9045° N, 27.5615° E",
