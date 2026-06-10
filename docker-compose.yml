@@ -1,6 +1,6 @@
 services:
   nginx:
-    build: .
+    image: ghcr.io/chibixar/portfolio-react:latest
     ports:
       - "80:80"
       - "443:443"
