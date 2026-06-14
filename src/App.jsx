@@ -22,29 +22,38 @@ const CONFIG = {
     "I turn manual toil into deterministic pipelines — if it's not in code, it doesn't exist.",
   ],
   contact: {
-    email: "minkevicharkadz@gmail.com",          // FIX #2: real email added
+    email: "minkevicharkadz@gmail.com",
     github: "github.com/chibixar",
     linkedin: null,
-    telegram: null,
   },
   skills: [
     {
       group: "infrastructure/",
       items: [
-        { name: "Terraform",  level: 82 },
-        { name: "Ansible",    level: 88 },
-        { name: "Docker",     level: 90 },
-        { name: "Linux/Bash", level: 95 },
-        { name: "Kubernetes", level: 50 },
+        { name: "Linux / Bash",  level: "daily" },
+        { name: "Docker",        level: "daily" },
+        { name: "Ansible",       level: "comfortable" },
+        { name: "Terraform",     level: "comfortable" },
+        { name: "Kubernetes",    level: "learning" },
       ],
     },
     {
       group: "delivery/",
       items: [
-        { name: "GitHub Actions", level: 88 },
-        { name: "Nginx",          level: 88 },
-        { name: "Cloudflare DNS", level: 99 },
-        { name: "Git",            level: 90 },
+        { name: "Nginx",          level: "daily" },
+        { name: "Traefik",        level: "comfortable" },
+        { name: "Git",            level: "daily" },
+        { name: "GitHub Actions", level: "comfortable" },
+        { name: "Cloudflare DNS", level: "comfortable" },
+      ],
+    },
+    {
+      group: "platforms/",
+      items: [
+        { name: "Hetzner",        level: "daily" },
+        { name: "Yandex Cloud",   level: "familiar" },
+        { name: "Self-hosting",   level: "daily" },
+        { name: "Kubernetes lab", level: "learning" },
       ],
     },
   ],
@@ -55,6 +64,13 @@ const CONFIG = {
       desc: "Built and deployed this portfolio using Terraform, Ansible, GitHub Actions, Docker, and Nginx on a cloud VPS. Full IaC pipeline.",
       tags: ["terraform", "ansible", "docker", "nginx", "github-actions"],
       type: "project",
+    },
+    {
+      date: "2026",
+      title: "SadServers Master",
+      desc: "Achieved Master rank on SadServers.com — solved real-world Linux debugging challenges covering filesystem issues, process management, networking, and system recovery under production-like pressure.",
+      tags: ["linux", "bash", "debugging", "sysadmin"],
+      type: "milestone",
     },
     {
       date: "2026",
@@ -91,36 +107,35 @@ const CONFIG = {
       desc: "Production-ready WireGuard VPN on a cloud VPC. Nginx reverse proxy handles traffic routing; provisioned with Terraform, configured with Ansible.",
       tags: ["wireguard", "nginx", "terraform", "ansible"],
       status: "active",
+      link: null,
     },
     {
       name: "pi-hole-server",
       desc: "Self-hosted Pi-hole DNS sinkhole on Ubuntu for network-wide ad and tracker blocking. Configured as the primary DNS resolver for the local network.",
       tags: ["pi-hole", "dns", "ubuntu", "self-hosted"],
       status: "active",
+      link: null,
     },
     {
       name: "portfolio-infra",
       desc: "This very site — infrastructure fully defined as code. Terraform provisions the cloud resources, Ansible configures the server, GitHub Actions deploys on every push to main.",
       tags: ["terraform", "ansible", "github-actions", "nginx", "docker"],
       status: "active",
-    },
-    {
-      name: "innowise-devops-course",
-      desc: "Completed the Innowise DevOps Practice Course. Hands-on modules covering Linux administration, Git workflows, Docker, and Ansible automation.",
-      tags: ["linux", "git", "docker", "ansible"],
-      status: "finished",
+      link: "https://github.com/chibixar/Portfolio",
     },
     {
       name: "docker-lab",
       desc: "Ongoing practice Dockerizing diverse applications — multi-stage builds, compose stacks, networking, volumes — to build production-grade containerisation muscle.",
       tags: ["docker", "bash", "linux"],
       status: "active",
+      link: null,
     },
     {
-      name: "dell-homelab",
-      desc: "First homelab experiments on a Dell Inspiron 15. Where the infrastructure obsession started — self-hosted services, bare-metal Linux, local networking.",
-      tags: ["homelab", "linux", "bare-metal"],
-      status: "abandoned",
+      name: "kubernetes-lab",
+      desc: "Hands-on Kubernetes practice — deployments, services, ingress controllers, namespaces, and resource limits. Progressing from local kind clusters toward cloud-managed nodes.",
+      tags: ["kubernetes", "docker", "linux", "yaml"],
+      status: "active",
+      link: null,
     },
   ],
   infraStack: [
@@ -153,7 +168,7 @@ function calcUptime() {
   return parts.join(" ");
 }
 
-// ─── FIX #3: Typewriter — both timeout AND interval are properly cancelled ────
+// ─── Typewriter ───────────────────────────────────────────────────────────────
 function useTypewriter(text, speed = 40, startDelay = 0) {
   const [displayed, setDisplayed] = useState("");
   const [done, setDone] = useState(false);
@@ -170,13 +185,13 @@ function useTypewriter(text, speed = 40, startDelay = 0) {
     }, startDelay);
     return () => {
       clearTimeout(timeoutId);
-      if (intervalId) clearInterval(intervalId);  // FIX: was missing
+      if (intervalId) clearInterval(intervalId);
     };
   }, [text, speed, startDelay]);
   return { displayed, done };
 }
 
-// ─── Network Background — deferred start ─────────────────────────────────────
+// ─── Network Background ───────────────────────────────────────────────────────
 function NetworkBackground() {
   const canvasRef = useRef(null);
   useEffect(() => {
@@ -189,7 +204,6 @@ function NetworkBackground() {
       resize();
       window.addEventListener("resize", resize);
       const isMobile = () => window.innerWidth < 600;
-      // FIX #6 (perf): reduced node counts
       const nodeCount = () => isMobile() ? 25 : 45;
       let nodes = [];
       const initNodes = () => {
@@ -238,7 +252,7 @@ function GlitchText({ text }) {
   return <span className="glitch" data-text={text} style={{ position: "relative", display: "inline-block" }}>{text}</span>;
 }
 
-// ─── FIX #5: 3D Hero Terminal — rAF pauses when idle ─────────────────────────
+// ─── 3D Hero Terminal ─────────────────────────────────────────────────────────
 function HeroTerminal3D({ children, title }) {
   const wrapRef = useRef(null);
   const rotRef = useRef({ x: 0, y: 0 });
@@ -269,7 +283,7 @@ function HeroTerminal3D({ children, title }) {
         frameRef.current = requestAnimationFrame(tick);
       } else {
         el.style.transform = ""; el.style.filter = "drop-shadow(0 4px 20px rgba(0,255,65,0.15))";
-        runningRef.current = false; // FIX: stop loop when idle
+        runningRef.current = false;
       }
     };
     const onEnter = () => {
@@ -335,35 +349,52 @@ function Prompt({ cmd, output, delay = 0 }) {
 }
 
 // ─── Skill Badge ──────────────────────────────────────────────────────────────
+const SKILL_LEVELS = {
+  daily:       { label: "daily driver", color: "#00ff41" },
+  comfortable: { label: "comfortable",  color: "#44aaff" },
+  familiar:    { label: "familiar",     color: "#aaaa44" },
+  learning:    { label: "learning",     color: "#aa44ff" },
+};
 function SkillBadge({ name, level }) {
-  const bars = Math.round(level / 10);
+  const meta = SKILL_LEVELS[level] || SKILL_LEVELS.familiar;
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8, flexWrap: "wrap" }}>
-      <span style={{ color: "#00ff41", width: "clamp(100px,40%,160px)", fontSize: 12, letterSpacing: 1, flexShrink: 0 }}>{name}</span>
-      <div style={{ display: "flex", gap: 2, flexShrink: 0 }}>
-        {Array(10).fill(0).map((_, i) => (
-          <div key={i} style={{ width: 7, height: 13, background: i < bars ? "#00ff41" : "#001a00", border: `1px solid ${i < bars ? "#00ff41" : "#003300"}`, boxShadow: i < bars ? "0 0 4px #00ff41" : "none", transition: `all 0.3s ease ${i * 60}ms` }} />
-        ))}
-      </div>
-      <span style={{ color: "#005500", fontSize: 11 }}>{level}%</span>
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginBottom: 10, flexWrap: "wrap" }}>
+      <span style={{ color: "#00ff41", fontSize: 12, letterSpacing: 1 }}>{name}</span>
+      <span style={{
+        fontSize: 9, padding: "2px 8px", border: `1px solid ${meta.color}`, color: meta.color,
+        borderRadius: 2, letterSpacing: 2, whiteSpace: "nowrap", textTransform: "uppercase",
+        boxShadow: `0 0 6px ${meta.color}22`,
+      }}>
+        {meta.label}
+      </span>
     </div>
   );
 }
 
 // ─── Project Card ─────────────────────────────────────────────────────────────
-function ProjectCard({ name, desc, tags, status }) {
+function ProjectCard({ name, desc, tags, status, link }) {
   const [hovered, setHovered] = useState(false);
   const statusColor = status === "active" ? "#00ff41" : status === "finished" ? "#4488ff" : status === "abandoned" ? "#883300" : "#555";
   return (
-    <div onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)} style={{ border: `1px solid ${hovered ? "#00ff41" : "#003300"}`, background: hovered ? "rgba(0,255,65,0.04)" : "rgba(0,8,0,0.85)", borderRadius: 4, padding: "16px 18px", transition: "all 0.25s ease", boxShadow: hovered ? "0 0 20px rgba(0,255,65,0.1)" : "none", position: "relative", overflow: "hidden" }}>
+    <div onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)} style={{ border: `1px solid ${hovered ? "#00ff41" : "#003300"}`, background: hovered ? "rgba(0,255,65,0.04)" : "rgba(0,8,0,0.85)", borderRadius: 4, padding: "16px 18px", transition: "all 0.25s ease", boxShadow: hovered ? "0 0 20px rgba(0,255,65,0.1)" : "none", position: "relative", overflow: "hidden", display: "flex", flexDirection: "column" }}>
       {hovered && <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 1, background: "linear-gradient(90deg,transparent,#00ff41,transparent)", animation: "scanline 1.5s linear infinite" }} />}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8, gap: 8 }}>
         <span style={{ color: "#00ff41", fontWeight: 700, fontSize: "clamp(12px,3vw,14px)", letterSpacing: 1, wordBreak: "break-word" }}>{name}</span>
         <span style={{ fontSize: 9, padding: "2px 6px", border: `1px solid ${statusColor}`, color: statusColor, borderRadius: 2, letterSpacing: 1, flexShrink: 0, whiteSpace: "nowrap" }}>{status.toUpperCase()}</span>
       </div>
       <p style={{ color: "#88aa88", fontSize: "clamp(11px,2.5vw,12px)", lineHeight: 1.6, margin: "0 0 12px" }}>{desc}</p>
-      <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+      <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 12 }}>
         {tags.map(t => <span key={t} style={{ fontSize: 9, color: "#004400", background: "#001400", border: "1px solid #003300", padding: "2px 5px", borderRadius: 2, letterSpacing: 1 }}>{t}</span>)}
+      </div>
+      <div style={{ marginTop: "auto", paddingTop: 8, borderTop: "1px solid #001a00" }}>
+        {link ? (
+          <a href={link} target="_blank" rel="noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: 6, color: "#00ff41", textDecoration: "none", fontFamily: "monospace", fontSize: 11, letterSpacing: 1 }}>
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#00ff41" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="6" r="3"/><path d="M6 9v6M18 9a9 9 0 0 1-9 9"/></svg>
+            view repo
+          </a>
+        ) : (
+          <span style={{ fontFamily: "monospace", fontSize: 10, color: "#003300", letterSpacing: 1 }}>// repo not yet public</span>
+        )}
       </div>
     </div>
   );
@@ -405,7 +436,7 @@ function TimelineEntry({ entry, index }) {
 
 // ─── Section Header ───────────────────────────────────────────────────────────
 function SectionHeader({ cmd }) {
-  const { displayed } = useTypewriter(cmd, 30, 100);
+  const { displayed } = useTypewriter(cmd, 18, 50);
   return (
     <div style={{ marginBottom: 28, fontFamily: "monospace", fontSize: "clamp(10px,2.5vw,13px)", overflowX: "auto", whiteSpace: "nowrap" }}>
       <span style={{ color: "#00ff41" }}>{PROMPT}</span>{" "}
@@ -415,12 +446,11 @@ function SectionHeader({ cmd }) {
   );
 }
 
-// ─── FIX #6: Nav — mobile scroll lock ─────────────────────────────────────────
+// ─── Nav ──────────────────────────────────────────────────────────────────────
 function Nav({ active, onNav }) {
   const links = ["whoami", "cv", "skills", "projects", "timeline", "infra", "contact"];
   const [menuOpen, setMenuOpen] = useState(false);
 
-  // FIX: lock body scroll when mobile menu is open
   useEffect(() => {
     document.body.style.overflow = menuOpen ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
@@ -458,7 +488,7 @@ function Nav({ active, onNav }) {
   );
 }
 
-// ─── FIX #5: 3D Name — rAF pauses when idle ──────────────────────────────────
+// ─── 3D Name ──────────────────────────────────────────────────────────────────
 function Name3D() {
   const ref = useRef(null);
   const rotRef = useRef({ x: 0, y: 0 });
@@ -477,7 +507,7 @@ function Name3D() {
         el.style.transform = `perspective(800px) rotateX(${x}deg) rotateY(${y}deg)`;
         frameRef.current = requestAnimationFrame(tick);
       } else {
-        el.style.transform = ""; runningRef.current = false; // FIX: stop when flat
+        el.style.transform = ""; runningRef.current = false;
       }
     };
     const startTick = () => { if (!runningRef.current) { runningRef.current = true; tick(); } };
@@ -505,42 +535,90 @@ function Name3D() {
   );
 }
 
+// ─── Quick Link Pill ──────────────────────────────────────────────────────────
+function QuickLink({ href, icon, children, sub }) {
+  return (
+    <a href={href} target={href.startsWith("http") ? "_blank" : undefined} rel="noreferrer"
+      style={{ display: "inline-flex", alignItems: "center", gap: 8, fontFamily: "monospace", fontSize: "clamp(10px,2.5vw,12px)", color: "#00ff41", textDecoration: "none", border: "1px solid #00ff41", borderRadius: 3, padding: "6px 14px", background: "rgba(0,255,65,0.05)", letterSpacing: 1, boxShadow: "0 0 10px rgba(0,255,65,0.12)", transition: "all 0.2s ease" }}
+      onMouseEnter={e => { e.currentTarget.style.background = "rgba(0,255,65,0.12)"; e.currentTarget.style.boxShadow = "0 0 20px rgba(0,255,65,0.25)"; }}
+      onMouseLeave={e => { e.currentTarget.style.background = "rgba(0,255,65,0.05)"; e.currentTarget.style.boxShadow = "0 0 10px rgba(0,255,65,0.12)"; }}
+    >
+      {icon}
+      {children}
+      {sub && <span style={{ color: "#336633", fontSize: "clamp(9px,2vw,10px)" }}>{sub}</span>}
+    </a>
+  );
+}
+
 // ─── Section: whoami ──────────────────────────────────────────────────────────
 function WhoAmI() {
+  const [copied, setCopied] = useState(false);
+  const copyEmail = () => {
+    navigator.clipboard?.writeText(CONFIG.contact.email).catch(() => {});
+    setCopied(true); setTimeout(() => setCopied(false), 2000);
+  };
+
   return (
     <div style={{ maxWidth: 900, margin: "0 auto" }}>
-      <div style={{ marginBottom: 48, textAlign: "center" }}>
+      <div style={{ marginBottom: 40, textAlign: "center" }}>
         <div style={{ fontFamily: "monospace", color: "#003300", fontSize: 11, marginBottom: 16, letterSpacing: 4 }}>INITIALIZING PROFILE...</div>
         <Name3D />
-        <div style={{ display: "flex", justifyContent: "center", gap: 12, flexWrap: "wrap", margin: "24px 0 32px", padding: "0 8px" }}>
+        <div style={{ display: "flex", justifyContent: "center", gap: 12, flexWrap: "wrap", margin: "24px 0 20px", padding: "0 8px" }}>
           {[CONFIG.role, CONFIG.location].map(tag => (
             <span key={tag} style={{ fontFamily: "monospace", fontSize: "clamp(9px,2.5vw,12px)", color: "#005500", letterSpacing: 2 }}>// {tag}</span>
           ))}
         </div>
-        <div style={{ display: "inline-block", background: "#000400", border: "1px solid #002200", borderRadius: 3, padding: "3px 14px" }}>
+
+        <div style={{ maxWidth: 600, margin: "0 auto 24px", fontFamily: "monospace", fontSize: "clamp(11px,2.5vw,13px)", color: "#88cc88", lineHeight: 1.8 }}>
+          {CONFIG.bio.map((line, i) => <div key={i}>{line}</div>)}
+        </div>
+
+        <div style={{ display: "inline-block", background: "#000400", border: "1px solid #002200", borderRadius: 3, padding: "3px 14px", marginBottom: 20 }}>
           <span style={{ fontFamily: "monospace", fontSize: 11, color: "#00aa41", letterSpacing: 2 }}>● SYSTEM ONLINE</span>
         </div>
-        {/* Repo link */}
-        <div style={{ marginTop: 20 }}>
-          <a href={CONFIG.portfolioRepo} target="_blank" rel="noreferrer"
-            style={{ display: "inline-flex", alignItems: "center", gap: 10, fontFamily: "monospace", fontSize: "clamp(10px,2.5vw,12px)", color: "#00ff41", textDecoration: "none", border: "1px solid #00ff41", borderRadius: 3, padding: "7px 16px", background: "rgba(0,255,65,0.05)", letterSpacing: 1, boxShadow: "0 0 12px rgba(0,255,65,0.15), inset 0 0 12px rgba(0,255,65,0.03)", transition: "all 0.2s ease" }}
-            onMouseEnter={e => { e.currentTarget.style.background = "rgba(0,255,65,0.12)"; e.currentTarget.style.boxShadow = "0 0 24px rgba(0,255,65,0.3)"; }}
-            onMouseLeave={e => { e.currentTarget.style.background = "rgba(0,255,65,0.05)"; e.currentTarget.style.boxShadow = "0 0 12px rgba(0,255,65,0.15), inset 0 0 12px rgba(0,255,65,0.03)"; }}
+
+        <div style={{ display: "flex", justifyContent: "center", gap: 10, flexWrap: "wrap" }}>
+          <QuickLink
+            href="#"
+            icon={
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#00ff41" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>
+              </svg>
+            }
           >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#00ff41" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
-              <circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="6" r="3"/>
-              <path d="M6 9v6M18 9a9 9 0 0 1-9 9"/>
-            </svg>
-            <span>github.com/chibixar/<strong style={{ color: "#00ff41" }}>Portfolio</strong></span>
-            <span style={{ color: "#336633", fontSize: "clamp(9px,2vw,10px)" }}>// infrastructure source</span>
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#00ff41" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, opacity: 0.5 }}>
-              <path d="M7 17L17 7M7 7h10v10"/>
-            </svg>
-          </a>
+            <span onClick={(e) => { e.preventDefault(); copyEmail(); }} style={{ cursor: "pointer" }}>
+              {copied ? "✓ copied!" : CONFIG.contact.email}
+            </span>
+          </QuickLink>
+
+          <QuickLink
+            href={`https://${CONFIG.contact.github}`}
+            icon={
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#00ff41" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6 0 0 0-1.3-3.2 4.2 4.2 0 0 0-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3 0 0 0-6.2 0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2 0 0 0-.1 3.2A4.6 4.6 0 0 0 4 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/>
+              </svg>
+            }
+          >
+            {CONFIG.contact.github}
+          </QuickLink>
+
+          <QuickLink
+            href={CONFIG.portfolioRepo}
+            icon={
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#00ff41" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="6" r="3"/>
+                <path d="M6 9v6M18 9a9 9 0 0 1-9 9"/>
+              </svg>
+            }
+            sub="// infra source"
+          >
+            Portfolio
+          </QuickLink>
         </div>
       </div>
+
       <HeroTerminal3D title={`${CONFIG.handle}@${CONFIG.hostname} — bash`}>
-        <Prompt cmd="cat /etc/profile.d/me.conf" delay={400} output={
+        <Prompt cmd="cat /etc/profile.d/me.conf" delay={150} output={
           <div style={{ fontSize: "clamp(10px,2.5vw,12px)" }}>
             <div><span style={{ color: "#005500" }}>NAME</span>=<span style={{ color: "#00cc41" }}>"{CONFIG.firstName} {CONFIG.lastName}"</span></div>
             <div><span style={{ color: "#005500" }}>LOCATION</span>=<span style={{ color: "#00cc41" }}>"{CONFIG.location}"</span></div>
@@ -548,10 +626,10 @@ function WhoAmI() {
             <div><span style={{ color: "#005500" }}>DOMAIN</span>=<span style={{ color: "#00cc41" }}>"{CONFIG.domain}"</span></div>
           </div>
         } />
-        <Prompt cmd="cat ~/bio.txt" delay={2000} output={
-          <div style={{ fontSize: "clamp(10px,2.5vw,12px)" }}>{CONFIG.bio.map((line, i) => <div key={i}>{line}</div>)}</div>
+        <Prompt cmd="uptime --devops" delay={900} output={
+          <span style={{ color: "#00ff41", fontWeight: "bold" }}>{calcUptime()} and counting</span>
         } />
-        <Prompt cmd="echo $READY_TO_BUILD" delay={4200} output={
+        <Prompt cmd="echo $READY_TO_BUILD" delay={1500} output={
           <span style={{ color: "#00ff41", fontWeight: "bold" }}>true</span>
         } />
       </HeroTerminal3D>
@@ -571,7 +649,6 @@ function CV() {
     <div style={{ maxWidth: 900, margin: "0 auto" }}>
       <SectionHeader cmd="cat ~/cv/arkadz.pdf" />
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12, marginBottom: 20 }}>
-        {/* Language toggle */}
         <div style={{ display: "flex", border: "1px solid #003300", borderRadius: 3, overflow: "hidden" }}>
           {["en", "ru"].map(l => (
             <button key={l} onClick={() => setLang(l)} style={{ background: lang === l ? "rgba(0,255,65,0.12)" : "transparent", border: "none", borderRight: l === "en" ? "1px solid #003300" : "none", color: lang === l ? "#00ff41" : "#336633", fontFamily: "monospace", fontSize: 11, letterSpacing: 2, padding: "6px 20px", cursor: "pointer", transition: "all 0.2s ease" }}>
@@ -579,7 +656,6 @@ function CV() {
             </button>
           ))}
         </div>
-        {/* Download button */}
         <a href={current.path} download={current.label}
           style={{ display: "inline-flex", alignItems: "center", gap: 8, fontFamily: "monospace", fontSize: 11, letterSpacing: 1, color: "#00ff41", textDecoration: "none", border: "1px solid #00ff41", borderRadius: 3, padding: "6px 16px", background: "rgba(0,255,65,0.05)", boxShadow: "0 0 10px rgba(0,255,65,0.12)", transition: "all 0.2s ease" }}
           onMouseEnter={e => { e.currentTarget.style.background = "rgba(0,255,65,0.12)"; e.currentTarget.style.boxShadow = "0 0 20px rgba(0,255,65,0.25)"; }}
@@ -591,7 +667,6 @@ function CV() {
           wget {current.label}
         </a>
       </div>
-      {/* Terminal-framed PDF viewer */}
       <div style={{ background: "rgba(0,8,0,0.92)", border: "1px solid #00ff41", borderRadius: 4, overflow: "hidden", boxShadow: "0 0 30px rgba(0,255,65,0.12), inset 0 0 30px rgba(0,0,0,0.5)" }}>
         <div style={{ background: "#001400", borderBottom: "1px solid #00ff41", padding: "6px 12px", display: "flex", alignItems: "center", gap: 8 }}>
           <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#ff5f57", display: "inline-block" }} />
@@ -608,7 +683,6 @@ function CV() {
           />
         </div>
       </div>
-      {/* Both links at bottom */}
       <div style={{ display: "flex", gap: 10, marginTop: 16, flexWrap: "wrap" }}>
         {Object.entries(files).map(([l, f]) => (
           <a key={l} href={f.path} download={f.label}
@@ -628,6 +702,14 @@ function Skills() {
   return (
     <div style={{ maxWidth: 900, margin: "0 auto" }}>
       <SectionHeader cmd="ls -la ~/skills/" />
+      <div style={{ display: "flex", gap: 14, flexWrap: "wrap", marginBottom: 24, fontFamily: "monospace", fontSize: 10, letterSpacing: 1 }}>
+        {Object.entries(SKILL_LEVELS).map(([key, meta]) => (
+          <span key={key} style={{ color: meta.color, display: "flex", alignItems: "center", gap: 6 }}>
+            <span style={{ width: 8, height: 8, borderRadius: "50%", background: meta.color, display: "inline-block", boxShadow: `0 0 6px ${meta.color}` }} />
+            {meta.label}
+          </span>
+        ))}
+      </div>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%,340px), 1fr))", gap: 20 }}>
         {CONFIG.skills.map(group => (
           <Terminal key={group.group} title={group.group}>
@@ -668,12 +750,11 @@ function Timeline() {
   );
 }
 
-// ─── FIX #2: PipelineDiagram — isMobile via state + resize listener ───────────
+// ─── Pipeline Diagram ─────────────────────────────────────────────────────────
 function PipelineDiagram() {
   const [activeStep, setActiveStep] = useState(-1);
   const [running, setRunning] = useState(false);
   const [packets, setPackets] = useState([]);
-  // FIX: was a bare window.innerWidth read at render time
   const [isMobile, setIsMobile] = useState(() => typeof window !== "undefined" && window.innerWidth < 640);
   const packetId = useRef(0);
   const timeoutIds = useRef([]);
@@ -694,7 +775,6 @@ function PipelineDiagram() {
     { id: "live",  label: "live",         icon: "✓",  sub: "chibixar.com",         color: "#00ff41" },
   ];
 
-  // FIX: clear all pending timeouts on unmount to avoid setState after unmount
   useEffect(() => () => timeoutIds.current.forEach(clearTimeout), []);
 
   const run = useCallback(() => {
@@ -784,14 +864,12 @@ function Infra() {
   );
 }
 
-// ─── FIX #1 #4: Contact — stable commands, persistent log via useRef ──────────
-// FIX #2 impl: copy email button + uptime command
+// ─── Section: contact ─────────────────────────────────────────────────────────
 function Contact() {
   const [input, setInput] = useState("");
   const [copied, setCopied] = useState(false);
   const logRef = useRef(null);
   const inputRef = useRef(null);
-  // FIX #4: log persists across section switches via useRef
   const persistedLog = useRef([{ type: "sys", text: `Connection established. Type "help" for commands.` }]);
   const [log, setLog] = useState(persistedLog.current);
 
@@ -800,18 +878,16 @@ function Contact() {
     setLog([...persistedLog.current]);
   }, []);
 
-  // FIX #7: contactCmds computed once, not duplicated
   const contactCmds = Object.entries(CONFIG.contact)
     .filter(([, v]) => v !== null)
     .reduce((acc, [key, value]) => {
-      const href = key === "email" ? `mailto:${value}` : `https://${value}`;
+      let href;
+      if (key === "email") href = `mailto:${value}`;
+      else href = `https://${value}`;
       acc[key] = () => [{ type: "link", text: href, label: `→ ${value}` }];
       return acc;
     }, {});
 
-  // FIX #3 impl: uptime command
-  // FIX #2 impl: copy command
-  // FIX #1: commands object defined inside handleCmd to avoid stale closure
   const getCommands = useCallback(() => ({
     help: () => [
       { type: "out", text: "Available commands:" },
@@ -857,26 +933,21 @@ function Contact() {
   return (
     <div style={{ maxWidth: 700, margin: "0 auto" }}>
       <SectionHeader cmd="nc -l 4444  # listening for connections" />
+
+      <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 20 }}>
+        <a href={`mailto:${CONFIG.contact.email}`} style={{ display: "inline-flex", alignItems: "center", gap: 8, fontFamily: "monospace", fontSize: 11, color: "#00aa41", textDecoration: "none", border: "1px solid #002200", borderRadius: 3, padding: "6px 14px", background: "rgba(0,255,65,0.04)", transition: "all 0.2s" }}
+          onMouseEnter={e => { e.currentTarget.style.borderColor = "#00ff41"; e.currentTarget.style.color = "#00ff41"; }}
+          onMouseLeave={e => { e.currentTarget.style.borderColor = "#002200"; e.currentTarget.style.color = "#00aa41"; }}>
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          {CONFIG.contact.email}
+        </a>
+        <button onClick={() => { navigator.clipboard?.writeText(CONFIG.contact.email).catch(() => {}); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
+          style={{ display: "inline-flex", alignItems: "center", gap: 6, fontFamily: "monospace", fontSize: 11, cursor: "pointer", color: copied ? "#00ff41" : "#336633", border: `1px solid ${copied ? "#00ff41" : "#003300"}`, borderRadius: 3, padding: "6px 14px", background: copied ? "rgba(0,255,65,0.1)" : "transparent", transition: "all 0.2s", letterSpacing: 1 }}>
+          {copied ? "✓ copied" : "copy email"}
+        </button>
+      </div>
+
       <Terminal title="contact — interactive shell">
-        {/* Copy email button — FIX #2 */}
-        {CONFIG.contact.email && (
-          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16, padding: "10px 14px", background: "rgba(0,255,65,0.04)", border: "1px solid #002200", borderRadius: 3, flexWrap: "wrap" }}>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#336633" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
-              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>
-            </svg>
-            <span style={{ fontFamily: "monospace", fontSize: 12, color: "#00aa41", letterSpacing: 1, flex: 1 }}>{CONFIG.contact.email}</span>
-            <button
-              onClick={() => { navigator.clipboard?.writeText(CONFIG.contact.email).catch(() => {}); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
-              style={{ background: copied ? "rgba(0,255,65,0.15)" : "transparent", border: `1px solid ${copied ? "#00ff41" : "#003300"}`, color: copied ? "#00ff41" : "#336633", fontFamily: "monospace", fontSize: 10, padding: "3px 10px", cursor: "pointer", borderRadius: 2, letterSpacing: 1, transition: "all 0.2s", flexShrink: 0 }}
-            >
-              {copied ? "✓ copied" : "copy"}
-            </button>
-            <a href={`mailto:${CONFIG.contact.email}`} style={{ fontFamily: "monospace", fontSize: 10, color: "#336633", letterSpacing: 1, textDecoration: "none", border: "1px solid #002200", borderRadius: 2, padding: "3px 10px", transition: "all 0.2s" }}
-              onMouseEnter={e => { e.currentTarget.style.color = "#00ff41"; e.currentTarget.style.borderColor = "#00ff41"; }}
-              onMouseLeave={e => { e.currentTarget.style.color = "#336633"; e.currentTarget.style.borderColor = "#002200"; }}
-            >mailto</a>
-          </div>
-        )}
         <div className="quick-cmds" style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 12 }}>
           {quickCmds.map(cmd => (
             <button key={cmd} onClick={() => { const commands = getCommands(); const result = commands[cmd] ? commands[cmd]() : []; appendLog([{ type: "cmd", text: cmd }, ...(result || [])]); }}
@@ -912,10 +983,9 @@ function Contact() {
 // ─── Section map ──────────────────────────────────────────────────────────────
 const SECTION_MAP = { whoami: WhoAmI, cv: CV, skills: Skills, projects: Projects, timeline: Timeline, infra: Infra, contact: Contact };
 
-// ─── FIX #7 impl + #9: App — meta tags + live vim clock ──────────────────────
+// ─── App ──────────────────────────────────────────────────────────────────────
 export default function App() {
   const [section, setSection] = useState("whoami");
-  // FIX #9: clock is state updated by interval, not stale render value
   const [clock, setClock] = useState(() => new Date().toLocaleTimeString("en-US", { hour12: false }));
 
   useEffect(() => {
@@ -923,17 +993,16 @@ export default function App() {
     return () => clearInterval(id);
   }, []);
 
-  // FIX #7: inject OG/meta tags into document head
   useEffect(() => {
     const tags = [
-      { property: "og:title",       content: `${CONFIG.firstName} ${CONFIG.lastName} — ${CONFIG.role}` },
-      { property: "og:description", content: CONFIG.bio[0] },
-      { property: "og:url",         content: `https://${CONFIG.domain}` },
-      { property: "og:type",        content: "website" },
-      { name: "twitter:card",       content: "summary" },
-      { name: "twitter:title",      content: `${CONFIG.firstName} ${CONFIG.lastName} — ${CONFIG.role}` },
-      { name: "twitter:description",content: CONFIG.bio[0] },
-      { name: "description",        content: CONFIG.bio[0] },
+      { property: "og:title",        content: `${CONFIG.firstName} ${CONFIG.lastName} — ${CONFIG.role}` },
+      { property: "og:description",  content: CONFIG.bio[0] },
+      { property: "og:url",          content: `https://${CONFIG.domain}` },
+      { property: "og:type",         content: "website" },
+      { name: "twitter:card",        content: "summary" },
+      { name: "twitter:title",       content: `${CONFIG.firstName} ${CONFIG.lastName} — ${CONFIG.role}` },
+      { name: "twitter:description", content: CONFIG.bio[0] },
+      { name: "description",         content: CONFIG.bio[0] },
     ];
     const els = tags.map(attrs => {
       const el = document.createElement("meta");
@@ -941,7 +1010,6 @@ export default function App() {
       document.head.appendChild(el);
       return el;
     });
-    // set title
     const prevTitle = document.title;
     document.title = `${CONFIG.firstName} ${CONFIG.lastName} — ${CONFIG.role}`;
     return () => { els.forEach(el => el.remove()); document.title = prevTitle; };
@@ -953,7 +1021,6 @@ export default function App() {
     <>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;900&display=swap');
-        /* ↑ Move to index.html <head> as preconnect + <link> for faster load */
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         html { scroll-behavior: smooth; }
         body { background: #000400; color: #00cc41; font-family: 'JetBrains Mono', monospace; overflow-x: hidden; }
@@ -990,7 +1057,6 @@ export default function App() {
         <div key={section} className="section-enter" style={{ padding: "24px 16px", position: "relative", zIndex: 3 }}>
           <ActiveSection />
         </div>
-        {/* Vim status bar — FIX #9: clock from state */}
         <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 100, background: "rgba(0,8,0,0.98)", borderTop: "1px solid #001a00", padding: "4px 12px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <span style={{ fontFamily: "monospace", fontSize: 9, color: "#003300", letterSpacing: 1 }}>INSERT — {section.toUpperCase()} — UTF-8</span>
           <span style={{ fontFamily: "monospace", fontSize: 9, color: "#003300", letterSpacing: 1 }}>{clock} {CONFIG.timezone} · {CONFIG.timezoneLabel}</span>
