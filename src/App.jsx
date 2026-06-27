@@ -691,7 +691,7 @@ function CV() {
             onMouseLeave={e => { e.currentTarget.style.color = "#336633"; e.currentTarget.style.borderColor = "#002200"; }}
           >↓ {f.label}</a>
         ))}
-        <span style={{ fontFamily: "monospace", fontSize: 10, color: "#003300", alignSelf: "center", letterSpacing: 1 }}># place PDFs in /public/assets/</span>
+        <span style={{ fontFamily: "monospace", fontSize: 10, color: "#003300", alignSelf: "center", letterSpacing: 1 }}># pdf's to download</span>
       </div>
     </div>
   );
