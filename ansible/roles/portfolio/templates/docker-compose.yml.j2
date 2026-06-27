@@ -9,6 +9,8 @@ services:
       - ./certbot/www:/var/www/certbot
       - ./certbot/conf:/etc/letsencrypt
     restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   certbot:
     image: certbot/certbot
