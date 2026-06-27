@@ -14,7 +14,7 @@
       - openssl
     state: present
 
-#  Docker
+# Docker
 - name: Add Docker GPG key
   apt_key:
     url: https://download.docker.com/linux/ubuntu/gpg
@@ -65,8 +65,8 @@
     state: directory
     mode: "0755"
 
-#  Check which certs already exist 
-- name: Check if real cert exists for main domain
+# Check which certs already exist 
+- name: Check if real cert exists for combined domains
   shell: |
     openssl x509 -in /opt/portfolio/certbot/conf/live/{{ domain }}/fullchain.pem \
       -noout -issuer 2>/dev/null | grep -q "Let's Encrypt"
@@ -74,23 +74,15 @@
   failed_when: false
   changed_when: false
 
-- name: Check if real cert exists for status subdomain
-  shell: |
-    openssl x509 -in /opt/portfolio/certbot/conf/live/status.{{ domain }}/fullchain.pem \
-      -noout -issuer 2>/dev/null | grep -q "Let's Encrypt"
-  register: real_cert_status
-  failed_when: false
-  changed_when: false
-
-#  Dummy certs only if real ones don't exist
-- name: Create dummy cert directory for main domain
+# Dummy certs only if real ones don't exist
+- name: Create dummy cert directory
   file:
     path: /opt/portfolio/certbot/conf/live/{{ domain }}
     state: directory
     mode: "0755"
   when: real_cert.rc != 0
 
-- name: Generate dummy cert for main domain
+- name: Generate dummy cert
   shell: |
     openssl req -x509 -nodes -newkey rsa:2048 \
       -keyout /opt/portfolio/certbot/conf/live/{{ domain }}/privkey.pem \
@@ -98,22 +90,7 @@
       -days 1 -subj "/CN={{ domain }}"
   when: real_cert.rc != 0
 
-- name: Create dummy cert directory for status subdomain
-  file:
-    path: /opt/portfolio/certbot/conf/live/status.{{ domain }}
-    state: directory
-    mode: "0755"
-  when: real_cert_status.rc != 0
-
-- name: Generate dummy cert for status subdomain
-  shell: |
-    openssl req -x509 -nodes -newkey rsa:2048 \
-      -keyout /opt/portfolio/certbot/conf/live/status.{{ domain }}/privkey.pem \
-      -out /opt/portfolio/certbot/conf/live/status.{{ domain }}/fullchain.pem \
-      -days 1 -subj "/CN=status.{{ domain }}"
-  when: real_cert_status.rc != 0
-
-#  Copy files
+# Copy files
 - name: Copy docker-compose.yml
   template:
     src: docker-compose.yml.j2
@@ -135,32 +112,28 @@
     project_src: /opt/portfolio
     state: present
 
-# Issue real certs — stop certbot first to avoid lock conflicts
-- name: Stop certbot renewal container before issuing certs
-  community.docker.docker_compose_v2:
-    project_src: /opt/portfolio
-    services:
-      - certbot
-    state: absent
-  when: real_cert.rc != 0 or real_cert_status.rc != 0
-
-- name: Issue real cert for main domain
-  command: >
-    docker run --rm
-    -v /opt/portfolio/certbot/www:/var/www/certbot
-    -v /opt/portfolio/certbot/conf:/etc/letsencrypt
-    certbot/certbot certonly
-    --webroot
-    --webroot-path=/var/www/certbot
-    --email {{ email }}
-    --agree-tos
-    --no-eff-email
-    --non-interactive
-    --force-renewal
-    -d {{ domain }}
+# Wait for Nginx to bind to port 80 safely 
+- name: Wait for Nginx to be ready on port 80
+  wait_for:
+    port: 80
+    delay: 5
+    timeout: 60
   when: real_cert.rc != 0
 
-- name: Issue real cert for status subdomain
+- name: Remove dummy certs so Certbot can create real ones cleanly
+  file:
+    path: "/opt/portfolio/certbot/conf/live/{{ domain }}"
+    state: absent
+  when: real_cert.rc != 0
+
+# (Ensure this remains `command:` and not the module to prevent tearing down Nginx)
+- name: Stop certbot renewal container before issuing certs
+  command: docker compose stop certbot
+  args:
+    chdir: /opt/portfolio
+  when: real_cert.rc != 0
+
+- name: Issue real cert for combined domains (Bypass Rate Limit)
   command: >
     docker run --rm
     -v /opt/portfolio/certbot/www:/var/www/certbot
@@ -173,8 +146,8 @@
     --no-eff-email
     --non-interactive
     --force-renewal
-    -d status.{{ domain }}
-  when: real_cert_status.rc != 0
+    -d {{ domain }} -d status.{{ domain }}
+  when: real_cert.rc != 0
 
 # Restart certbot and reload nginx
 - name: Start all containers
@@ -182,8 +155,8 @@
     project_src: /opt/portfolio
     state: present
 
-- name: Reload nginx with real certs
-  command: docker compose exec nginx nginx -s reload
+- name: Restart nginx to load real certs completely
+  command: docker compose restart nginx
   args:
     chdir: /opt/portfolio
-  when: real_cert.rc != 0 or real_cert_status.rc != 0
+  when: real_cert.rc != 0
