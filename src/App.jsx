@@ -697,7 +697,7 @@ function CV() {
   );
 }
 
-// ─── Section: skills ──────────────────────────────────────────────────────────
+// ─── Section: skills ──────────────────────────────────────────────────────────--
 function Skills() {
   return (
     <div style={{ maxWidth: 900, margin: "0 auto" }}>
